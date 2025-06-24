@@ -1,0 +1,318 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+
+    /* Theme transition */
+    --transition-duration: 0.3s;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    transition: background-color var(--transition-duration) ease-in-out, border-color var(--transition-duration)
+      ease-in-out, color var(--transition-duration) ease-in-out;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Dark mode specific styles with purple theme */
+.dark {
+  color-scheme: dark;
+}
+
+/* Sidebar specific dark mode styles */
+.dark [data-sidebar="sidebar"] {
+  @apply bg-gray-900 border-purple-500/30;
+}
+
+.dark [data-sidebar="header"] {
+  @apply border-purple-500/30;
+}
+
+.dark [data-sidebar="footer"] {
+  @apply border-purple-500/30;
+}
+
+/* Card styles in dark mode */
+.dark .bg-white {
+  @apply bg-gray-800 border-purple-500/30;
+}
+
+.dark .border-gray-200 {
+  @apply border-purple-500/30;
+}
+
+.dark .shadow-sm {
+  @apply shadow-purple-500/10;
+}
+
+.dark .shadow-md {
+  @apply shadow-purple-500/20;
+}
+
+.dark .shadow-lg {
+  @apply shadow-purple-500/30;
+}
+
+/* Text colors in dark mode */
+.dark .text-black,
+.dark .text-gray-900,
+.dark .text-gray-800,
+.dark .text-gray-700,
+.dark .text-[#1A1A1A] {
+  @apply text-white;
+}
+
+.dark .text-gray-600 {
+  @apply text-gray-300;
+}
+
+/* Comprehensive dark mode text colors */
+.dark .text-gray-700 {
+  @apply text-gray-300;
+}
+
+.dark .text-gray-800 {
+  @apply text-gray-200;
+}
+
+.dark .text-gray-500 {
+  @apply text-gray-400;
+}
+
+/* Dialog and form specific styles */
+.dark [role="dialog"] .text-gray-700,
+.dark [role="dialog"] .text-gray-600 {
+  @apply text-gray-300;
+}
+
+.dark [role="dialog"] .text-[#1A1A1A] {
+  @apply text-white;
+}
+
+/* Card content text */
+.dark .bg-gray-50 {
+  @apply bg-gray-700 text-white;
+}
+
+.dark .border-gray-200 {
+  @apply border-purple-500/30;
+}
+
+/* Ensure all headings are white in dark mode */
+.dark h1,
+.dark h2,
+.dark h3,
+.dark h4,
+.dark h5,
+.dark h6 {
+  @apply text-white;
+}
+
+/* Badge text in dark mode */
+.dark .text-gray-500 {
+  @apply text-gray-400;
+}
+
+/* Background colors in dark mode */
+.dark .bg-gray-50 {
+  @apply bg-gray-900;
+}
+
+.dark .bg-gray-100 {
+  @apply bg-gray-800;
+}
+
+.dark .bg-gray-200 {
+  @apply bg-gray-700;
+}
+
+/* Input and form elements in dark mode */
+.dark input,
+.dark textarea,
+.dark select {
+  @apply bg-gray-800 border-purple-500/30 text-white;
+}
+
+/* Placeholder text in dark mode */
+.dark input::placeholder,
+.dark textarea::placeholder {
+  @apply text-gray-400;
+}
+
+/* Select trigger text */
+.dark [data-radix-select-trigger] {
+  @apply text-white;
+}
+
+/* Dialog titles and descriptions */
+.dark [data-radix-dialog-title] {
+  @apply text-white;
+}
+
+.dark [data-radix-dialog-description] {
+  @apply text-gray-300;
+}
+
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  @apply border-purple-500 ring-purple-500/20;
+}
+
+/* Button hover states in dark mode */
+.dark .hover\:bg-gray-50:hover {
+  @apply bg-gray-700;
+}
+
+.dark .hover\:bg-gray-100:hover {
+  @apply bg-gray-700;
+}
+
+/* Badge styles in dark mode */
+.dark .bg-\[7B61FF\]\/10 {
+  @apply bg-purple-500/20 border-purple-500/30;
+}
+
+/* Dropdown and dialog styles in dark mode */
+.dark [role="dialog"],
+.dark [role="menu"] {
+  @apply bg-gray-800 border-purple-500/30;
+}
+
+/* Floating Animations */
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0px) translateX(0px);
+  }
+  25% {
+    transform: translateY(-20px) translateX(10px);
+  }
+  50% {
+    transform: translateY(-10px) translateX(-5px);
+  }
+  75% {
+    transform: translateY(-30px) translateX(15px);
+  }
+}
+
+@keyframes float-medium {
+  0%,
+  100% {
+    transform: translateY(0px) translateX(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-15px) translateX(-10px) rotate(120deg);
+  }
+  66% {
+    transform: translateY(-25px) translateX(8px) rotate(240deg);
+  }
+}
+
+@keyframes float-fast {
+  0%,
+  100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-40px) scale(1.1);
+  }
+}
+
+.animate-float-slow {
+  animation: float-slow 8s ease-in-out infinite;
+}
+
+.animate-float-medium {
+  animation: float-medium 6s ease-in-out infinite;
+}
+
+.animate-float-fast {
+  animation: float-fast 4s ease-in-out infinite;
+}
+
+/* Smooth transitions for testimonial changes */
+.testimonial-transition {
+  transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+}
+
+/* Theme transition animations */
+.theme-transition {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Custom scrollbar for dark mode */
+.dark ::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  @apply bg-gray-800;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  @apply bg-purple-500/50 rounded-full;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  @apply bg-purple-500/70;
+}
