@@ -282,7 +282,7 @@ Cheers,
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-6 w-full">
                   <Card className="shadow-sm border-gray-200 dark:border-purple-500/30 dark:bg-gray-800 transition-all duration-300">
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
@@ -347,7 +347,7 @@ Cheers,
 
                 {/* Templates Grid */}
                 {filteredTemplates.length > 0 ? (
-                  <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 w-full">
                     {filteredTemplates.map((template) => (
                       <TemplateCard
                         key={template.id}
