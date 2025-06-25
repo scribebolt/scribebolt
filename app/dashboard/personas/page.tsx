@@ -132,7 +132,7 @@ export default function PersonasPage() {
           <DashboardSidebar />
           <SidebarInset className="flex-1">
             <main className="flex-1 overflow-auto bg-gray-50">
-              <div className="max-w-5xl mx-auto p-6 bg-white rounded-xl shadow space-y-8">
+              <div className="w-full p-8">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                   <div>
