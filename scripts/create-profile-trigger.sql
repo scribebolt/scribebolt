@@ -27,5 +27,4 @@ CREATE TRIGGER on_auth_user_created
 
 -- Grant necessary permissions
 GRANT USAGE ON SCHEMA public TO anon, authenticated;
-GRANT ALL ON public.profiles TO anon, authenticated;
-GRANT ALL ON public.profiles_id_seq TO anon, authenticated; 
+GRANT ALL ON public.profiles TO anon, authenticated; 
