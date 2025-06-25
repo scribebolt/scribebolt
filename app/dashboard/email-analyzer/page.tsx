@@ -60,35 +60,33 @@ export default function EmailAnalyzerPage() {
   const [emailContent, setEmailContent] = useState("")
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null)
+  const user_id = "REPLACE_WITH_USER_ID"; // TODO: get from session
 
   const handleAnalyze = async () => {
     if (!emailContent.trim()) return
 
     setIsAnalyzing(true)
-
-    // Simulate analysis
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-
-    // Mock analysis result
-    const result: AnalysisResult = {
-      personalizationScore: 75,
-      toneAnalysis: {
-        detected: "Professional",
-        confidence: 85,
-        suggestions: ["Consider adding more personal touches", "Use the recipient's name more frequently"],
-      },
-      spamPhrases: ["FREE", "Act now", "Limited time"],
-      readabilityScore: 82,
-      sentimentScore: 68,
-      improvements: [
-        "Add more specific details about the recipient's company",
-        "Include a clear call-to-action",
-        "Remove potential spam trigger words",
-        "Shorten sentences for better readability",
-      ],
+    const res = await fetch("/api/email-analyzer", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: emailContent, user_id }),
+    })
+    const data = await res.json()
+    if (data.success) {
+      // You may need to parse data.feedback into AnalysisResult format
+      setAnalysisResult({
+        personalizationScore: 75, // TODO: parse from data.feedback
+        toneAnalysis: {
+          detected: "Professional", // TODO: parse from data.feedback
+          confidence: 85, // TODO: parse from data.feedback
+          suggestions: ["Consider adding more personal touches"], // TODO: parse from data.feedback
+        },
+        spamPhrases: [], // TODO: parse from data.feedback
+        readabilityScore: 82, // TODO: parse from data.feedback
+        sentimentScore: 68, // TODO: parse from data.feedback
+        improvements: ["Add more specific details about the recipient's company"], // TODO: parse from data.feedback
+      })
     }
-
-    setAnalysisResult(result)
     setIsAnalyzing(false)
   }
 

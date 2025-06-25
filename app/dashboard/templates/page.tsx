@@ -16,7 +16,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   Sidebar,
   SidebarContent,
@@ -66,98 +66,47 @@ export default function TemplatesPage() {
   const [selectedTone, setSelectedTone] = useState("all")
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [editingTemplate, setEditingTemplate] = useState<EmailTemplate | null>(null)
+  const [templates, setTemplates] = useState<EmailTemplate[]>([])
+  const user_id = "REPLACE_WITH_USER_ID" // TODO: get from session
 
-  // Mock data - in a real app, this would come from an API
-  const [templates, setTemplates] = useState<EmailTemplate[]>([
-    {
-      id: "1",
-      title: "SaaS Founder Outreach",
-      subject: "Quick question about [Company Name]'s growth strategy",
-      content: `Hi [First Name],
+  useEffect(() => {
+    async function fetchTemplates() {
+      const res = await fetch(`/api/templates?user_id=${user_id}`)
+      const data = await res.json()
+      if (data.success) setTemplates(data.templates)
+    }
+    fetchTemplates()
+  }, [user_id])
 
-I noticed [Company Name] recently expanded into the European market - congratulations on that milestone! 
+  const handleCreateTemplate = async (template: EmailTemplate) => {
+    const res = await fetch("/api/templates", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id, name: template.title, content: template.content }),
+    })
+    const data = await res.json()
+    if (data.success) setTemplates([data.template, ...templates])
+  }
 
-I'm reaching out because I help companies like yours streamline their customer acquisition process through AI-powered email personalization. We've helped similar SaaS companies increase their response rates by 340%.
+  const handleUpdateTemplate = async (template: EmailTemplate) => {
+    const res = await fetch("/api/templates", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: template.id, user_id, name: template.title, content: template.content }),
+    })
+    const data = await res.json()
+    if (data.success) setTemplates(templates.map(t => t.id === template.id ? data.template : t))
+  }
 
-Would you be open to a brief 15-minute call this week to discuss how we could help [Company Name] scale your outreach efforts?
-
-Best regards,
-[Your Name]`,
-      category: "Sales",
-      tone: "Professional",
-      isFavorite: true,
-      createdAt: "2024-01-15",
-      lastUsed: "2024-01-20",
-      usageCount: 45,
-      tags: ["saas", "growth", "outreach"],
-    },
-    {
-      id: "2",
-      title: "Recruiter Follow-up",
-      subject: "Following up on our conversation about [Position]",
-      content: `Hey [First Name],
-
-Thanks for taking the time to chat yesterday about the [Position] role at [Company Name]. I really enjoyed learning about your experience with [specific skill/project].
-
-Based on our conversation, I think you'd be a fantastic fit for this position. The team is looking for someone with exactly your background in [relevant experience].
-
-Are you available for a quick call this week to discuss the next steps?
-
-Best,
-[Your Name]`,
-      category: "Recruiting",
-      tone: "Friendly",
-      isFavorite: false,
-      createdAt: "2024-01-10",
-      lastUsed: "2024-01-18",
-      usageCount: 23,
-      tags: ["recruiting", "follow-up", "position"],
-    },
-    {
-      id: "3",
-      title: "Partnership Proposal",
-      subject: "Partnership opportunity for [Company Name]",
-      content: `Hello [First Name],
-
-I've been following [Company Name]'s journey and your recent [specific milestone] is impressive. Your focus on [company value/mission] aligns perfectly with what we're building.
-
-We help companies like yours automate and personalize their outreach at scale. Our AI has generated over $2M in pipeline for our clients this quarter alone.
-
-Are you available for a quick call to explore how we might collaborate?
-
-Best,
-[Your Name]`,
-      category: "Partnerships",
-      tone: "Direct",
-      isFavorite: true,
-      createdAt: "2024-01-08",
-      lastUsed: "2024-01-19",
-      usageCount: 12,
-      tags: ["partnership", "collaboration", "business"],
-    },
-    {
-      id: "4",
-      title: "Agency Client Outreach",
-      subject: "Love what [Company Name] is doing in [Industry]",
-      content: `Hey [First Name],
-
-Just came across [Company Name] and I'm genuinely impressed by your approach to [specific company focus]. The recent [specific achievement/news] caught my attention.
-
-I work with fast-growing companies to optimize their cold outreach using AI. We've helped teams like yours save 10+ hours per week while improving response rates significantly.
-
-Mind if I share a quick case study that might be relevant to [Company Name]'s growth goals?
-
-Cheers,
-[Your Name]`,
-      category: "Agency",
-      tone: "Friendly",
-      isFavorite: false,
-      createdAt: "2024-01-05",
-      lastUsed: "2024-01-17",
-      usageCount: 67,
-      tags: ["agency", "client", "case-study"],
-    },
-  ])
+  const handleDeleteTemplate = async (templateId: string) => {
+    const res = await fetch("/api/templates", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: templateId, user_id }),
+    })
+    const data = await res.json()
+    if (data.success) setTemplates(templates.filter(t => t.id !== templateId))
+  }
 
   const categories = ["all", "Sales", "Recruiting", "Partnerships", "Agency", "Follow-up"]
   const tones = ["all", "Friendly", "Direct", "Professional", "Funny"]
@@ -181,10 +130,6 @@ Cheers,
         template.id === templateId ? { ...template, isFavorite: !template.isFavorite } : template,
       ),
     )
-  }
-
-  const deleteTemplate = (templateId: string) => {
-    setTemplates(templates.filter((template) => template.id !== templateId))
   }
 
   const copyToClipboard = (content: string) => {
@@ -236,7 +181,7 @@ Cheers,
                       isOpen={isCreateDialogOpen}
                       onClose={() => setIsCreateDialogOpen(false)}
                       onSave={(template) => {
-                        setTemplates([template, ...templates])
+                        handleCreateTemplate(template)
                         setIsCreateDialogOpen(false)
                       }}
                     />
@@ -353,7 +298,7 @@ Cheers,
                         key={template.id}
                         template={template}
                         onToggleFavorite={toggleFavorite}
-                        onDelete={deleteTemplate}
+                        onDelete={handleDeleteTemplate}
                         onCopy={copyToClipboard}
                         onDuplicate={duplicateTemplate}
                         onEdit={setEditingTemplate}
@@ -392,7 +337,7 @@ Cheers,
                     isOpen={!!editingTemplate}
                     onClose={() => setEditingTemplate(null)}
                     onSave={(updatedTemplate) => {
-                      setTemplates(templates.map((t) => (t.id === updatedTemplate.id ? updatedTemplate : t)))
+                      handleUpdateTemplate(updatedTemplate)
                       setEditingTemplate(null)
                     }}
                   />

@@ -59,72 +59,33 @@ export default function BulkPersonalizationPage() {
   const [isUploading, setIsUploading] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
   const [generatedCount, setGeneratedCount] = useState(0)
-
-  // Mock data for demonstration
-  const mockCsvData: CsvRow[] = [
-    {
-      id: 1,
-      firstName: "John",
-      lastName: "Smith",
-      email: "john@techstartup.com",
-      company: "TechStartup Inc",
-      linkedinUrl: "https://linkedin.com/in/johnsmith",
-      status: "completed",
-    },
-    {
-      id: 2,
-      firstName: "Sarah",
-      lastName: "Johnson",
-      email: "sarah@innovatecorp.com",
-      company: "InnovateCorp",
-      linkedinUrl: "https://linkedin.com/in/sarahjohnson",
-      status: "completed",
-    },
-    {
-      id: 3,
-      firstName: "Mike",
-      lastName: "Chen",
-      email: "mike@growthco.com",
-      company: "GrowthCo",
-      linkedinUrl: "https://linkedin.com/in/mikechen",
-      status: "processing",
-    },
-    {
-      id: 4,
-      firstName: "Emily",
-      lastName: "Davis",
-      email: "emily@scalevp.com",
-      company: "ScaleVP",
-      linkedinUrl: "https://linkedin.com/in/emilydavis",
-      status: "pending",
-    },
-  ]
+  const user_id = "REPLACE_WITH_USER_ID"; // TODO: get from session
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
-
     setCsvFile(file)
     setIsUploading(true)
-
-    // Simulate file processing
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-
-    setCsvData(mockCsvData)
+    // Parse CSV file here (use a library like PapaParse if needed)
+    // For now, assume CSV is parsed into rows
+    // Example: const parsedRows = await parseCsv(file);
+    // setCsvData(parsedRows);
     setIsUploading(false)
   }
 
   const handleGenerateAll = async () => {
     setIsGenerating(true)
     setGeneratedCount(0)
-
-    // Simulate processing each row
-    for (let i = 0; i < csvData.length; i++) {
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      setCsvData((prev) => prev.map((row, index) => (index === i ? { ...row, status: "completed" as const } : row)))
-      setGeneratedCount(i + 1)
+    const res = await fetch("/api/bulk-personalization", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rows: csvData, user_id, persona: "", tone: "", promptExamples: "" }), // Add persona/tone/examples as needed
+    })
+    const data = await res.json()
+    if (data.success) {
+      setCsvData(data.results)
+      setGeneratedCount(data.results.length)
     }
-
     setIsGenerating(false)
   }
 
