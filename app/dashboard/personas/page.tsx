@@ -130,9 +130,9 @@ export default function PersonasPage() {
       <SidebarProvider>
         <div className={`flex h-screen transition-all duration-300 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}>
           <DashboardSidebar />
-          <SidebarInset className="flex-1">
-            <main className="flex-1 overflow-auto">
-              <div className="p-8">
+          <SidebarInset className="flex-1 w-full">
+            <main className="flex-1 w-full overflow-auto">
+              <div className="px-4 sm:px-8 w-full max-w-none">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                   <div>

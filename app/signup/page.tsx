@@ -34,6 +34,10 @@ export default function SignUpPage() {
     }
   }
 
+  const handleGoogleSignup = () => {
+    window.location.href = "/api/auth/google";
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       {/* Background decoration */}
@@ -123,6 +127,8 @@ export default function SignUpPage() {
             <Button
               variant="outline"
               className="w-full h-11 border-gray-300 hover:bg-gray-50 text-[#1A1A1A] font-medium transition-colors"
+              onClick={handleGoogleSignup}
+              type="button"
             >
               <GoogleIcon className="mr-2 h-4 w-4" />
               Sign up with Google
