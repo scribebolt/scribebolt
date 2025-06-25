@@ -157,9 +157,9 @@ export default function TemplatesPage() {
           <DashboardSidebar />
           <SidebarInset className="flex-1">
             <main className="flex-1 overflow-auto bg-gray-50">
-              <div className="w-full p-8">
+              <div className="w-full p-8 space-y-8">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center justify-between mb-8 w-full">
                   <div>
                     <h1
                       className={`text-3xl font-bold mb-2 transition-colors duration-300 ${isDark ? "text-white" : "text-[#1A1A1A]"}`}
@@ -189,7 +189,7 @@ export default function TemplatesPage() {
                 </div>
 
                 {/* Filters and Search */}
-                <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                <div className="flex flex-col sm:flex-row gap-4 mb-6 w-full">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
@@ -227,7 +227,7 @@ export default function TemplatesPage() {
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-6 w-full">
                   <Card className="shadow-sm border-gray-200 dark:border-purple-500/30 dark:bg-gray-800 transition-all duration-300">
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
@@ -290,9 +290,9 @@ export default function TemplatesPage() {
                   </Card>
                 </div>
 
-                {/* Templates Grid */}
+                {/* Templates Grid or Empty State */}
                 {filteredTemplates.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 w-full">
                     {filteredTemplates.map((template) => (
                       <TemplateCard
                         key={template.id}
@@ -306,8 +306,8 @@ export default function TemplatesPage() {
                     ))}
                   </div>
                 ) : (
-                  <Card className="shadow-sm border-gray-200">
-                    <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                  <Card className="shadow-sm border-gray-200 w-full">
+                    <CardContent className="flex flex-col items-center justify-center py-12 text-center w-full h-72">
                       <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                         <FileText className="h-8 w-8 text-gray-400" />
                       </div>

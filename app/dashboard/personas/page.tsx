@@ -239,7 +239,7 @@ export default function PersonasPage() {
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-6 w-full">
                   <Card className="shadow-sm border-gray-200 dark:border-purple-500/30 dark:bg-gray-800 transition-all duration-300">
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
@@ -293,7 +293,7 @@ export default function PersonasPage() {
 
                 {/* Personas List */}
                 {filteredPersonas.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 w-full">
                     {filteredPersonas.map((persona) => (
                       <PersonaCard
                         key={persona.id}
@@ -305,8 +305,8 @@ export default function PersonasPage() {
                     ))}
                   </div>
                 ) : (
-                  <Card className="shadow-sm border-gray-200 dark:border-purple-500/30 dark:bg-gray-800 transition-all duration-300">
-                    <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                  <Card className="shadow-sm border-gray-200 w-full">
+                    <CardContent className="flex flex-col items-center justify-center py-12 text-center w-full h-72">
                       <div className="w-16 h-16 bg-[#7B61FF]/10 rounded-full flex items-center justify-center mb-4">
                         <Users className="h-8 w-8 text-[#7B61FF]" />
                       </div>
