@@ -24,7 +24,7 @@ export default function SignUpPage() {
     setError("");
 
     try {
-      // Sign up with Supabase Auth
+      // Sign up with Supabase Auth - the database trigger will create the profile automatically
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -38,24 +38,8 @@ export default function SignUpPage() {
       if (error) {
         setError(error.message);
       } else if (data.user) {
-        // Insert into profiles table via API
-        const profileResponse = await fetch("/api/auth/signup", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email,
-            password,
-            fullName,
-          }),
-        });
-
-        if (profileResponse.ok) {
-          router.push("/onboarding");
-        } else {
-          setError("Failed to create profile");
-        }
+        // Profile will be created automatically by the database trigger
+        router.push("/onboarding");
       }
     } catch (err) {
       setError("An unexpected error occurred");

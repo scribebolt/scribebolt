@@ -24,30 +24,8 @@ export default function AuthSuccessPage() {
         }
 
         if (session?.user) {
-          // Check if user profile exists
-          const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
-
-          if (profileError && profileError.code === 'PGRST116') {
-            // Profile doesn't exist, create it
-            const { error: insertError } = await supabase
-              .from('profiles')
-              .insert({
-                id: session.user.id,
-                email: session.user.email,
-                first_name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || 'User',
-                created_at: new Date().toISOString(),
-              });
-
-            if (insertError) {
-              console.error('Failed to create profile:', insertError);
-            }
-          }
-
-          // Redirect to dashboard
+          // Profile should be created automatically by the database trigger
+          // Just redirect to dashboard
           router.push('/dashboard');
         } else {
           setError("No session found");
