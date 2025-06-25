@@ -6,38 +6,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import Link from "next/link"
-import { useState } from "react"
 
 export default function SignUpPage() {
-  const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
-
-  const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setError("")
-    setLoading(true)
-    const form = e.currentTarget
-    const fullName = (form.elements.namedItem("name") as HTMLInputElement).value
-    const email = (form.elements.namedItem("email") as HTMLInputElement).value
-    const password = (form.elements.namedItem("password") as HTMLInputElement).value
-    const res = await fetch("/api/auth/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, fullName }),
-    })
-    const data = await res.json()
-    setLoading(false)
-    if (data.success) {
-      window.location.href = "/onboarding"
-    } else {
-      setError(data.error || "Signup failed")
-    }
-  }
-
-  const handleGoogleSignup = () => {
-    window.location.href = "/api/auth/google";
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       {/* Background decoration */}
@@ -66,7 +36,12 @@ export default function SignUpPage() {
           <CardContent className="space-y-6">
             <form
               className="space-y-4"
-              onSubmit={handleSignup}
+              onSubmit={(e) => {
+                e.preventDefault()
+                // In a real app, you'd handle the signup here
+                // For now, redirect to onboarding
+                window.location.href = "/onboarding"
+              }}
             >
               <div className="space-y-2">
                 <Label htmlFor="name" className="text-sm font-medium text-[#1A1A1A]">
@@ -105,13 +80,11 @@ export default function SignUpPage() {
                 />
                 <p className="text-xs text-gray-500">Must be at least 8 characters long</p>
               </div>
-              {error && <div className="text-red-600 text-sm text-center">{error}</div>}
               <Button
                 type="submit"
                 className="w-full h-11 bg-[#7B61FF] hover:bg-[#6B51E5] text-white font-medium transition-colors"
-                disabled={loading}
               >
-                {loading ? "Creating..." : "Create Account"}
+                Create Account
               </Button>
             </form>
 
@@ -127,8 +100,6 @@ export default function SignUpPage() {
             <Button
               variant="outline"
               className="w-full h-11 border-gray-300 hover:bg-gray-50 text-[#1A1A1A] font-medium transition-colors"
-              onClick={handleGoogleSignup}
-              type="button"
             >
               <GoogleIcon className="mr-2 h-4 w-4" />
               Sign up with Google

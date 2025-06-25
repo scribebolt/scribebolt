@@ -16,7 +16,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import {
   Sidebar,
   SidebarContent,
@@ -74,24 +74,48 @@ interface SharedResource {
   usageCount: number
 }
 
-const user_id = "REPLACE_WITH_USER_ID"; // TODO: get from session
-const workspace_id = "REPLACE_WITH_WORKSPACE_ID"; // TODO: get from context or session
-
 export default function TeamWorkspacePage() {
   const { isDark } = useTheme()
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false)
   const [inviteEmail, setInviteEmail] = useState("")
   const [inviteRole, setInviteRole] = useState<TeamMember["role"]>("Viewer")
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
 
-  useEffect(() => {
-    async function fetchTeamMembers() {
-      const res = await fetch(`/api/team-members?workspace_id=${workspace_id}`);
-      const data = await res.json();
-      if (data.success) setTeamMembers(data.members);
-    }
-    fetchTeamMembers();
-  }, [workspace_id]);
+  // Mock data
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([
+    {
+      id: "1",
+      name: "John Doe",
+      email: "john@company.com",
+      role: "Owner",
+      avatar: "/placeholder.svg?height=40&width=40",
+      joinedAt: "2024-01-01",
+      lastActive: "2024-01-20",
+    },
+    {
+      id: "2",
+      name: "Sarah Johnson",
+      email: "sarah@company.com",
+      role: "Editor",
+      joinedAt: "2024-01-05",
+      lastActive: "2024-01-19",
+    },
+    {
+      id: "3",
+      name: "Mike Chen",
+      email: "mike@company.com",
+      role: "Editor",
+      joinedAt: "2024-01-10",
+      lastActive: "2024-01-18",
+    },
+    {
+      id: "4",
+      name: "Emily Davis",
+      email: "emily@company.com",
+      role: "Viewer",
+      joinedAt: "2024-01-15",
+      lastActive: "2024-01-17",
+    },
+  ])
 
   const sharedResources: SharedResource[] = [
     {
@@ -128,39 +152,31 @@ export default function TeamWorkspacePage() {
     },
   ]
 
-  const handleInviteMember = async () => {
-    if (!inviteEmail) return;
-    const res = await fetch("/api/team-members", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ workspace_id, user_id, invited_email: inviteEmail, role: inviteRole }),
-    });
-    const data = await res.json();
-    if (data.success) setTeamMembers([...teamMembers, data.member]);
-    setInviteEmail("");
-    setInviteRole("Viewer");
-    setIsInviteDialogOpen(false);
-  };
+  const handleInviteMember = () => {
+    if (!inviteEmail) return
 
-  const updateMemberRole = async (memberId: string, newRole: TeamMember["role"]) => {
-    const res = await fetch("/api/team-members", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: memberId, user_id, role: newRole }),
-    });
-    const data = await res.json();
-    if (data.success) setTeamMembers(teamMembers.map((member) => member.id === memberId ? data.member : member));
-  };
+    const newMember: TeamMember = {
+      id: Date.now().toString(),
+      name: inviteEmail.split("@")[0],
+      email: inviteEmail,
+      role: inviteRole,
+      joinedAt: new Date().toISOString().split("T")[0],
+      lastActive: "Never",
+    }
 
-  const removeMember = async (memberId: string) => {
-    const res = await fetch("/api/team-members", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: memberId, user_id }),
-    });
-    const data = await res.json();
-    if (data.success) setTeamMembers(teamMembers.filter((member) => member.id !== memberId));
-  };
+    setTeamMembers([...teamMembers, newMember])
+    setInviteEmail("")
+    setInviteRole("Viewer")
+    setIsInviteDialogOpen(false)
+  }
+
+  const updateMemberRole = (memberId: string, newRole: TeamMember["role"]) => {
+    setTeamMembers(teamMembers.map((member) => (member.id === memberId ? { ...member, role: newRole } : member)))
+  }
+
+  const removeMember = (memberId: string) => {
+    setTeamMembers(teamMembers.filter((member) => member.id !== memberId))
+  }
 
   const getRoleIcon = (role: TeamMember["role"]) => {
     switch (role) {

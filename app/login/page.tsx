@@ -1,43 +1,11 @@
-"use client";
-
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import Link from "next/link"
-import { useState } from "react"
 
 export default function LoginPage() {
-  const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
-
-  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setError("")
-    setLoading(true)
-    const form = e.currentTarget
-    const email = (form.elements.namedItem("email") as HTMLInputElement).value
-    const password = (form.elements.namedItem("password") as HTMLInputElement).value
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    })
-    const data = await res.json()
-    setLoading(false)
-    if (data.success && data.session) {
-      localStorage.setItem("sb-access-token", data.session.access_token)
-      window.location.href = "/dashboard"
-    } else {
-      setError(data.error || "Login failed")
-    }
-  }
-
-  const handleGoogleLogin = () => {
-    window.location.href = "/api/auth/google";
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       {/* Background decoration */}
@@ -64,7 +32,7 @@ export default function LoginPage() {
             <CardDescription className="text-center text-gray-600">Sign in to your ScribeBolt account</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <form className="space-y-4" onSubmit={handleLogin}>
+            <form className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium text-[#1A1A1A]">
                   Email
@@ -97,13 +65,11 @@ export default function LoginPage() {
                   Forgot password?
                 </Link>
               </div>
-              {error && <div className="text-red-600 text-sm text-center">{error}</div>}
               <Button
                 type="submit"
                 className="w-full h-11 bg-[#7B61FF] hover:bg-[#6B51E5] text-white font-medium transition-colors"
-                disabled={loading}
               >
-                {loading ? "Logging in..." : "Log in"}
+                Log in
               </Button>
             </form>
 
@@ -119,8 +85,6 @@ export default function LoginPage() {
             <Button
               variant="outline"
               className="w-full h-11 border-gray-300 hover:bg-gray-50 text-[#1A1A1A] font-medium transition-colors"
-              onClick={handleGoogleLogin}
-              type="button"
             >
               <GoogleIcon className="mr-2 h-4 w-4" />
               Continue with Google

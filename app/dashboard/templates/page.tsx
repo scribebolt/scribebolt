@@ -16,7 +16,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import {
   Sidebar,
   SidebarContent,
@@ -66,47 +66,98 @@ export default function TemplatesPage() {
   const [selectedTone, setSelectedTone] = useState("all")
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [editingTemplate, setEditingTemplate] = useState<EmailTemplate | null>(null)
-  const [templates, setTemplates] = useState<EmailTemplate[]>([])
-  const user_id = "REPLACE_WITH_USER_ID" // TODO: get from session
 
-  useEffect(() => {
-    async function fetchTemplates() {
-      const res = await fetch(`/api/templates?user_id=${user_id}`)
-      const data = await res.json()
-      if (data.success) setTemplates(data.templates)
-    }
-    fetchTemplates()
-  }, [user_id])
+  // Mock data - in a real app, this would come from an API
+  const [templates, setTemplates] = useState<EmailTemplate[]>([
+    {
+      id: "1",
+      title: "SaaS Founder Outreach",
+      subject: "Quick question about [Company Name]'s growth strategy",
+      content: `Hi [First Name],
 
-  const handleCreateTemplate = async (template: EmailTemplate) => {
-    const res = await fetch("/api/templates", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id, name: template.title, content: template.content }),
-    })
-    const data = await res.json()
-    if (data.success) setTemplates([data.template, ...templates])
-  }
+I noticed [Company Name] recently expanded into the European market - congratulations on that milestone! 
 
-  const handleUpdateTemplate = async (template: EmailTemplate) => {
-    const res = await fetch("/api/templates", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: template.id, user_id, name: template.title, content: template.content }),
-    })
-    const data = await res.json()
-    if (data.success) setTemplates(templates.map(t => t.id === template.id ? data.template : t))
-  }
+I'm reaching out because I help companies like yours streamline their customer acquisition process through AI-powered email personalization. We've helped similar SaaS companies increase their response rates by 340%.
 
-  const handleDeleteTemplate = async (templateId: string) => {
-    const res = await fetch("/api/templates", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: templateId, user_id }),
-    })
-    const data = await res.json()
-    if (data.success) setTemplates(templates.filter(t => t.id !== templateId))
-  }
+Would you be open to a brief 15-minute call this week to discuss how we could help [Company Name] scale your outreach efforts?
+
+Best regards,
+[Your Name]`,
+      category: "Sales",
+      tone: "Professional",
+      isFavorite: true,
+      createdAt: "2024-01-15",
+      lastUsed: "2024-01-20",
+      usageCount: 45,
+      tags: ["saas", "growth", "outreach"],
+    },
+    {
+      id: "2",
+      title: "Recruiter Follow-up",
+      subject: "Following up on our conversation about [Position]",
+      content: `Hey [First Name],
+
+Thanks for taking the time to chat yesterday about the [Position] role at [Company Name]. I really enjoyed learning about your experience with [specific skill/project].
+
+Based on our conversation, I think you'd be a fantastic fit for this position. The team is looking for someone with exactly your background in [relevant experience].
+
+Are you available for a quick call this week to discuss the next steps?
+
+Best,
+[Your Name]`,
+      category: "Recruiting",
+      tone: "Friendly",
+      isFavorite: false,
+      createdAt: "2024-01-10",
+      lastUsed: "2024-01-18",
+      usageCount: 23,
+      tags: ["recruiting", "follow-up", "position"],
+    },
+    {
+      id: "3",
+      title: "Partnership Proposal",
+      subject: "Partnership opportunity for [Company Name]",
+      content: `Hello [First Name],
+
+I've been following [Company Name]'s journey and your recent [specific milestone] is impressive. Your focus on [company value/mission] aligns perfectly with what we're building.
+
+We help companies like yours automate and personalize their outreach at scale. Our AI has generated over $2M in pipeline for our clients this quarter alone.
+
+Are you available for a quick call to explore how we might collaborate?
+
+Best,
+[Your Name]`,
+      category: "Partnerships",
+      tone: "Direct",
+      isFavorite: true,
+      createdAt: "2024-01-08",
+      lastUsed: "2024-01-19",
+      usageCount: 12,
+      tags: ["partnership", "collaboration", "business"],
+    },
+    {
+      id: "4",
+      title: "Agency Client Outreach",
+      subject: "Love what [Company Name] is doing in [Industry]",
+      content: `Hey [First Name],
+
+Just came across [Company Name] and I'm genuinely impressed by your approach to [specific company focus]. The recent [specific achievement/news] caught my attention.
+
+I work with fast-growing companies to optimize their cold outreach using AI. We've helped teams like yours save 10+ hours per week while improving response rates significantly.
+
+Mind if I share a quick case study that might be relevant to [Company Name]'s growth goals?
+
+Cheers,
+[Your Name]`,
+      category: "Agency",
+      tone: "Friendly",
+      isFavorite: false,
+      createdAt: "2024-01-05",
+      lastUsed: "2024-01-17",
+      usageCount: 67,
+      tags: ["agency", "client", "case-study"],
+    },
+  ])
 
   const categories = ["all", "Sales", "Recruiting", "Partnerships", "Agency", "Follow-up"]
   const tones = ["all", "Friendly", "Direct", "Professional", "Funny"]
@@ -130,6 +181,10 @@ export default function TemplatesPage() {
         template.id === templateId ? { ...template, isFavorite: !template.isFavorite } : template,
       ),
     )
+  }
+
+  const deleteTemplate = (templateId: string) => {
+    setTemplates(templates.filter((template) => template.id !== templateId))
   }
 
   const copyToClipboard = (content: string) => {
@@ -156,10 +211,10 @@ export default function TemplatesPage() {
         <div className={`flex h-screen transition-all duration-300 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}>
           <DashboardSidebar />
           <SidebarInset className="flex-1">
-            <main className="flex-1 overflow-auto bg-gray-50">
-              <div className="w-full p-8 space-y-8">
+            <main className="flex-1 overflow-auto">
+              <div className="p-6 max-w-7xl mx-auto">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-8 w-full">
+                <div className="flex items-center justify-between mb-6">
                   <div>
                     <h1
                       className={`text-3xl font-bold mb-2 transition-colors duration-300 ${isDark ? "text-white" : "text-[#1A1A1A]"}`}
@@ -181,7 +236,7 @@ export default function TemplatesPage() {
                       isOpen={isCreateDialogOpen}
                       onClose={() => setIsCreateDialogOpen(false)}
                       onSave={(template) => {
-                        handleCreateTemplate(template)
+                        setTemplates([template, ...templates])
                         setIsCreateDialogOpen(false)
                       }}
                     />
@@ -189,7 +244,7 @@ export default function TemplatesPage() {
                 </div>
 
                 {/* Filters and Search */}
-                <div className="flex flex-col sm:flex-row gap-4 mb-6 w-full">
+                <div className="flex flex-col sm:flex-row gap-4 mb-6">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
@@ -227,7 +282,7 @@ export default function TemplatesPage() {
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-6 w-full">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                   <Card className="shadow-sm border-gray-200 dark:border-purple-500/30 dark:bg-gray-800 transition-all duration-300">
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
@@ -290,15 +345,15 @@ export default function TemplatesPage() {
                   </Card>
                 </div>
 
-                {/* Templates Grid or Empty State */}
+                {/* Templates Grid */}
                 {filteredTemplates.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 w-full">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
                     {filteredTemplates.map((template) => (
                       <TemplateCard
                         key={template.id}
                         template={template}
                         onToggleFavorite={toggleFavorite}
-                        onDelete={handleDeleteTemplate}
+                        onDelete={deleteTemplate}
                         onCopy={copyToClipboard}
                         onDuplicate={duplicateTemplate}
                         onEdit={setEditingTemplate}
@@ -306,8 +361,8 @@ export default function TemplatesPage() {
                     ))}
                   </div>
                 ) : (
-                  <Card className="shadow-sm border-gray-200 w-full">
-                    <CardContent className="flex flex-col items-center justify-center py-12 text-center w-full h-72">
+                  <Card className="shadow-sm border-gray-200">
+                    <CardContent className="flex flex-col items-center justify-center py-12 text-center">
                       <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                         <FileText className="h-8 w-8 text-gray-400" />
                       </div>
@@ -337,7 +392,7 @@ export default function TemplatesPage() {
                     isOpen={!!editingTemplate}
                     onClose={() => setEditingTemplate(null)}
                     onSave={(updatedTemplate) => {
-                      handleUpdateTemplate(updatedTemplate)
+                      setTemplates(templates.map((t) => (t.id === updatedTemplate.id ? updatedTemplate : t)))
                       setEditingTemplate(null)
                     }}
                   />

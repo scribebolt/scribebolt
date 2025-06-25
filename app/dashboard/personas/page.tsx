@@ -14,7 +14,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import {
   Sidebar,
   SidebarContent,
@@ -52,74 +52,68 @@ import {
 import Link from "next/link"
 import { useTheme } from "@/lib/theme-context"
 
-interface Persona {
-  id: string;
-  name: string;
-  description: string;
-  painPoints?: string;
-  createdAt?: string;
-  lastUsed?: string;
-  usageCount?: number;
-}
-
 export default function PersonasPage() {
   const { isDark, toggleTheme } = useTheme()
   const [searchQuery, setSearchQuery] = useState("")
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const [editingPersona, setEditingPersona] = useState<Persona | null>(null)
-  const [personas, setPersonas] = useState<Persona[]>([])
-  const user_id = "REPLACE_WITH_USER_ID" // TODO: get from session
+  const [editingPersona, setEditingPersona] = useState(null)
 
-  useEffect(() => {
-    async function fetchPersonas() {
-      const res = await fetch(`/api/personas?user_id=${user_id}`)
-      const data = await res.json()
-      if (data.success) setPersonas(data.personas)
-    }
-    fetchPersonas()
-  }, [user_id])
-
-  const handleCreatePersona = async (persona: Persona) => {
-    const res = await fetch("/api/personas", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id, name: persona.name, description: persona.description }),
-    })
-    const data = await res.json()
-    if (data.success) setPersonas([data.persona, ...personas])
-  }
-
-  const handleUpdatePersona = async (persona: Persona) => {
-    const res = await fetch("/api/personas", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: persona.id, user_id, name: persona.name, description: persona.description }),
-    })
-    const data = await res.json()
-    if (data.success) setPersonas(personas.map(p => p.id === persona.id ? data.persona : p))
-  }
-
-  const handleDeletePersona = async (personaId: string) => {
-    const res = await fetch("/api/personas", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: personaId, user_id }),
-    })
-    const data = await res.json()
-    if (data.success) setPersonas(personas.filter(p => p.id !== personaId))
-  }
+  // Mock data - in a real app, this would come from an API
+  const [personas, setPersonas] = useState([
+    {
+      id: "1",
+      name: "Startup CTO",
+      description: "Technical leader at early-stage startups",
+      painPoints:
+        "Scaling engineering teams, choosing the right tech stack, managing technical debt while moving fast, balancing feature development with infrastructure needs.",
+      createdAt: "2024-01-15",
+      lastUsed: "2024-01-20",
+      usageCount: 23,
+    },
+    {
+      id: "2",
+      name: "Ecommerce Founder",
+      description: "Founder of D2C ecommerce brands",
+      painPoints:
+        "Customer acquisition costs rising, inventory management challenges, competing with Amazon, building brand loyalty, optimizing conversion rates.",
+      createdAt: "2024-01-10",
+      lastUsed: "2024-01-18",
+      usageCount: 45,
+    },
+    {
+      id: "3",
+      name: "SaaS Marketing Director",
+      description: "Marketing leader at B2B SaaS companies",
+      painPoints:
+        "Generating qualified leads, proving marketing ROI, long sales cycles, competitive market, attribution challenges across multiple touchpoints.",
+      createdAt: "2024-01-08",
+      lastUsed: "2024-01-19",
+      usageCount: 31,
+    },
+    {
+      id: "4",
+      name: "Agency Owner",
+      description: "Owner of digital marketing agency",
+      painPoints:
+        "Client retention, scaling operations, finding quality talent, pricing services competitively, managing cash flow with project-based revenue.",
+      createdAt: "2024-01-05",
+      lastUsed: "2024-01-17",
+      usageCount: 18,
+    },
+  ])
 
   const filteredPersonas = personas.filter(
     (persona) =>
       persona.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       persona.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      persona.painPoints?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      persona.createdAt?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      persona.lastUsed?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      persona.usageCount?.toString().includes(searchQuery.toLowerCase()),
+      persona.painPoints.toLowerCase().includes(searchQuery.toLowerCase()),
   )
 
-  const usePersonaInRewrite = (persona: Persona) => {
+  const deletePersona = (personaId) => {
+    setPersonas(personas.filter((persona) => persona.id !== personaId))
+  }
+
+  const usePersonaInRewrite = (persona) => {
     // In a real app, this would navigate to the rewrite page with the persona pre-selected
     console.log("Using persona in rewrite:", persona.name)
     // You could use router.push('/dashboard?persona=' + persona.id) here
@@ -131,10 +125,10 @@ export default function PersonasPage() {
         <div className={`flex h-screen transition-all duration-300 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}>
           <DashboardSidebar />
           <SidebarInset className="flex-1">
-            <main className="flex-1 overflow-auto bg-gray-50">
-              <div className="w-full p-8">
+            <main className="flex-1 overflow-auto">
+              <div className="p-6 max-w-7xl mx-auto">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center justify-between mb-6">
                   <div>
                     <h1
                       className={`text-3xl font-bold mb-2 transition-colors duration-300 ${isDark ? "text-white" : "text-[#1A1A1A]"}`}
@@ -203,7 +197,7 @@ export default function PersonasPage() {
                           </Button>
                           <Button
                             onClick={() => {
-                              const newPersona: Persona = {
+                              const newPersona = {
                                 id: Date.now().toString(),
                                 name: searchQuery,
                                 description: searchQuery,
@@ -212,7 +206,7 @@ export default function PersonasPage() {
                                 lastUsed: "",
                                 usageCount: 0,
                               }
-                              handleCreatePersona(newPersona)
+                              setPersonas([newPersona, ...personas])
                               setIsCreateDialogOpen(false)
                             }}
                             className="bg-[#7B61FF] hover:bg-[#6B51E5] text-white"
@@ -239,7 +233,7 @@ export default function PersonasPage() {
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-6 w-full">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                   <Card className="shadow-sm border-gray-200 dark:border-purple-500/30 dark:bg-gray-800 transition-all duration-300">
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
@@ -263,7 +257,7 @@ export default function PersonasPage() {
                             Total Usage
                           </p>
                           <p className="text-2xl font-bold text-[#1A1A1A] dark:text-white transition-colors duration-300">
-                            {personas.reduce((sum, p) => sum + (p.usageCount ?? 0), 0)}
+                            {personas.reduce((sum, p) => sum + p.usageCount, 0)}
                           </p>
                         </div>
                         <Target className="h-8 w-8 text-green-500" />
@@ -280,7 +274,7 @@ export default function PersonasPage() {
                           <p className="text-lg font-bold text-[#1A1A1A] dark:text-white transition-colors duration-300 truncate">
                             {personas.length > 0
                               ? personas.reduce((prev, current) =>
-                                  (prev.usageCount ?? 0) > (current.usageCount ?? 0) ? prev : current,
+                                  prev.usageCount > current.usageCount ? prev : current,
                                 ).name
                               : "None"}
                           </p>
@@ -293,20 +287,20 @@ export default function PersonasPage() {
 
                 {/* Personas List */}
                 {filteredPersonas.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 w-full">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                     {filteredPersonas.map((persona) => (
                       <PersonaCard
                         key={persona.id}
                         persona={persona}
-                        onDelete={handleDeletePersona}
+                        onDelete={deletePersona}
                         onEdit={setEditingPersona}
                         onUse={usePersonaInRewrite}
                       />
                     ))}
                   </div>
                 ) : (
-                  <Card className="shadow-sm border-gray-200 w-full">
-                    <CardContent className="flex flex-col items-center justify-center py-12 text-center w-full h-72">
+                  <Card className="shadow-sm border-gray-200 dark:border-purple-500/30 dark:bg-gray-800 transition-all duration-300">
+                    <CardContent className="flex flex-col items-center justify-center py-12 text-center">
                       <div className="w-16 h-16 bg-[#7B61FF]/10 rounded-full flex items-center justify-center mb-4">
                         <Users className="h-8 w-8 text-[#7B61FF]" />
                       </div>
@@ -345,7 +339,7 @@ export default function PersonasPage() {
                           <Input
                             id="edit-name"
                             value={editingPersona.name}
-                            onChange={(e) => handleUpdatePersona({ ...editingPersona, name: e.target.value })}
+                            onChange={(e) => setEditingPersona({ ...editingPersona, name: e.target.value })}
                           />
                         </div>
 
@@ -359,7 +353,7 @@ export default function PersonasPage() {
                           <Input
                             id="edit-description"
                             value={editingPersona.description}
-                            onChange={(e) => handleUpdatePersona({ ...editingPersona, description: e.target.value })}
+                            onChange={(e) => setEditingPersona({ ...editingPersona, description: e.target.value })}
                           />
                         </div>
 
@@ -373,7 +367,7 @@ export default function PersonasPage() {
                           <Textarea
                             id="edit-painPoints"
                             value={editingPersona.painPoints}
-                            onChange={(e) => handleUpdatePersona({ ...editingPersona, painPoints: e.target.value })}
+                            onChange={(e) => setEditingPersona({ ...editingPersona, painPoints: e.target.value })}
                             className="min-h-[120px]"
                           />
                         </div>
@@ -385,7 +379,7 @@ export default function PersonasPage() {
                           <Button
                             onClick={() => {
                               if (editingPersona) {
-                                handleUpdatePersona(editingPersona)
+                                setPersonas(personas.map((p) => (p.id === editingPersona.id ? editingPersona : p)))
                                 setEditingPersona(null)
                               }
                             }}
@@ -407,12 +401,7 @@ export default function PersonasPage() {
   )
 }
 
-function PersonaCard({ persona, onDelete, onEdit, onUse }: {
-  persona: Persona;
-  onDelete: (id: string) => void;
-  onEdit: (persona: Persona) => void;
-  onUse: (persona: Persona) => void;
-}) {
+function PersonaCard({ persona, onDelete, onEdit, onUse }) {
   return (
     <Card className="shadow-sm border-gray-200 hover:shadow-md transition-shadow dark:border-purple-500/30 dark:bg-gray-800 transition-all duration-300">
       <CardHeader className="pb-3">
@@ -448,7 +437,7 @@ function PersonaCard({ persona, onDelete, onEdit, onUse }: {
 
         <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
           <span>Used {persona.usageCount} times</span>
-          <span>Created {new Date(persona.createdAt || '').toLocaleDateString()}</span>
+          <span>Created {new Date(persona.createdAt).toLocaleDateString()}</span>
         </div>
 
         <div className="flex space-x-2 pt-2">
