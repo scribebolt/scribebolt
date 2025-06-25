@@ -157,7 +157,7 @@ export default function TemplatesPage() {
           <DashboardSidebar />
           <SidebarInset className="flex-1 w-full">
             <main className="flex-1 w-full overflow-auto">
-              <div className="px-4 sm:px-8 w-full max-w-none">
+              <div className="w-full">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                   <div>
