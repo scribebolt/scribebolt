@@ -1,13 +1,86 @@
 "use client"
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import Link from "next/link"
+import { supabase } from "@/lib/supabase-client";
 
 export default function SignUpPage() {
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+
+    try {
+      // Sign up with Supabase Auth
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+          }
+        }
+      });
+
+      if (error) {
+        setError(error.message);
+      } else if (data.user) {
+        // Insert into profiles table via API
+        const profileResponse = await fetch("/api/auth/signup", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            password,
+            fullName,
+          }),
+        });
+
+        if (profileResponse.ok) {
+          router.push("/onboarding");
+        } else {
+          setError("Failed to create profile");
+        }
+      }
+    } catch (err) {
+      setError("An unexpected error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignup = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth-success`
+        }
+      });
+      
+      if (error) {
+        setError(error.message);
+      }
+    } catch (err) {
+      setError("Google signup failed");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       {/* Background decoration */}
@@ -34,15 +107,12 @@ export default function SignUpPage() {
             <CardDescription className="text-center text-gray-600">Get started with ScribeBolt today</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <form
-              className="space-y-4"
-              onSubmit={(e) => {
-                e.preventDefault()
-                // In a real app, you'd handle the signup here
-                // For now, redirect to onboarding
-                window.location.href = "/onboarding"
-              }}
-            >
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                {error}
+              </div>
+            )}
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="name" className="text-sm font-medium text-[#1A1A1A]">
                   Full Name
@@ -52,7 +122,10 @@ export default function SignUpPage() {
                   type="text"
                   placeholder="Enter your full name"
                   className="h-11 border-gray-300 focus:border-[#7B61FF] focus:ring-[#7B61FF]"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
                   required
+                  disabled={isLoading}
                 />
               </div>
               <div className="space-y-2">
@@ -64,7 +137,10 @@ export default function SignUpPage() {
                   type="email"
                   placeholder="Enter your email"
                   className="h-11 border-gray-300 focus:border-[#7B61FF] focus:ring-[#7B61FF]"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
+                  disabled={isLoading}
                 />
               </div>
               <div className="space-y-2">
@@ -76,15 +152,19 @@ export default function SignUpPage() {
                   type="password"
                   placeholder="Create a password"
                   className="h-11 border-gray-300 focus:border-[#7B61FF] focus:ring-[#7B61FF]"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
+                  disabled={isLoading}
                 />
                 <p className="text-xs text-gray-500">Must be at least 8 characters long</p>
               </div>
               <Button
                 type="submit"
                 className="w-full h-11 bg-[#7B61FF] hover:bg-[#6B51E5] text-white font-medium transition-colors"
+                disabled={isLoading}
               >
-                Create Account
+                {isLoading ? "Creating account..." : "Create Account"}
               </Button>
             </form>
 
@@ -98,8 +178,11 @@ export default function SignUpPage() {
             </div>
 
             <Button
+              type="button"
               variant="outline"
               className="w-full h-11 border-gray-300 hover:bg-gray-50 text-[#1A1A1A] font-medium transition-colors"
+              onClick={handleGoogleSignup}
+              disabled={isLoading}
             >
               <GoogleIcon className="mr-2 h-4 w-4" />
               Sign up with Google

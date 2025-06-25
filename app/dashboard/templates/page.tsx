@@ -16,7 +16,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   Sidebar,
   SidebarContent,
@@ -57,7 +57,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { useTheme } from "@/lib/theme-context"
-import type { EmailTemplate } from "@/types/email-template" // Declare EmailTemplate type
+import type { EmailTemplate } from "@/types/email-template"
 
 export default function TemplatesPage() {
   const { isDark, toggleTheme } = useTheme()
@@ -66,98 +66,48 @@ export default function TemplatesPage() {
   const [selectedTone, setSelectedTone] = useState("all")
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [editingTemplate, setEditingTemplate] = useState<EmailTemplate | null>(null)
+  const [templates, setTemplates] = useState<EmailTemplate[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState("")
 
-  // Mock data - in a real app, this would come from an API
-  const [templates, setTemplates] = useState<EmailTemplate[]>([
-    {
-      id: "1",
-      title: "SaaS Founder Outreach",
-      subject: "Quick question about [Company Name]'s growth strategy",
-      content: `Hi [First Name],
+  // Load templates from API
+  useEffect(() => {
+    const loadTemplates = async () => {
+      try {
+        const response = await fetch("/api/templates");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            // Transform API data to match EmailTemplate type
+            const transformedTemplates = data.templates.map((template: any) => ({
+              id: template.id,
+              title: template.name,
+              subject: template.subject || "",
+              content: template.content,
+              category: template.category || "General",
+              tone: template.tone || "Professional",
+              isFavorite: template.is_favorite || false,
+              createdAt: template.created_at?.split("T")[0] || new Date().toISOString().split("T")[0],
+              lastUsed: template.last_used?.split("T")[0] || new Date().toISOString().split("T")[0],
+              usageCount: template.usage_count || 0,
+              tags: template.tags || [],
+            }));
+            setTemplates(transformedTemplates);
+          } else {
+            setError(data.error || "Failed to load templates");
+          }
+        } else {
+          setError("Failed to load templates");
+        }
+      } catch (err) {
+        setError("Failed to load templates");
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-I noticed [Company Name] recently expanded into the European market - congratulations on that milestone! 
-
-I'm reaching out because I help companies like yours streamline their customer acquisition process through AI-powered email personalization. We've helped similar SaaS companies increase their response rates by 340%.
-
-Would you be open to a brief 15-minute call this week to discuss how we could help [Company Name] scale your outreach efforts?
-
-Best regards,
-[Your Name]`,
-      category: "Sales",
-      tone: "Professional",
-      isFavorite: true,
-      createdAt: "2024-01-15",
-      lastUsed: "2024-01-20",
-      usageCount: 45,
-      tags: ["saas", "growth", "outreach"],
-    },
-    {
-      id: "2",
-      title: "Recruiter Follow-up",
-      subject: "Following up on our conversation about [Position]",
-      content: `Hey [First Name],
-
-Thanks for taking the time to chat yesterday about the [Position] role at [Company Name]. I really enjoyed learning about your experience with [specific skill/project].
-
-Based on our conversation, I think you'd be a fantastic fit for this position. The team is looking for someone with exactly your background in [relevant experience].
-
-Are you available for a quick call this week to discuss the next steps?
-
-Best,
-[Your Name]`,
-      category: "Recruiting",
-      tone: "Friendly",
-      isFavorite: false,
-      createdAt: "2024-01-10",
-      lastUsed: "2024-01-18",
-      usageCount: 23,
-      tags: ["recruiting", "follow-up", "position"],
-    },
-    {
-      id: "3",
-      title: "Partnership Proposal",
-      subject: "Partnership opportunity for [Company Name]",
-      content: `Hello [First Name],
-
-I've been following [Company Name]'s journey and your recent [specific milestone] is impressive. Your focus on [company value/mission] aligns perfectly with what we're building.
-
-We help companies like yours automate and personalize their outreach at scale. Our AI has generated over $2M in pipeline for our clients this quarter alone.
-
-Are you available for a quick call to explore how we might collaborate?
-
-Best,
-[Your Name]`,
-      category: "Partnerships",
-      tone: "Direct",
-      isFavorite: true,
-      createdAt: "2024-01-08",
-      lastUsed: "2024-01-19",
-      usageCount: 12,
-      tags: ["partnership", "collaboration", "business"],
-    },
-    {
-      id: "4",
-      title: "Agency Client Outreach",
-      subject: "Love what [Company Name] is doing in [Industry]",
-      content: `Hey [First Name],
-
-Just came across [Company Name] and I'm genuinely impressed by your approach to [specific company focus]. The recent [specific achievement/news] caught my attention.
-
-I work with fast-growing companies to optimize their cold outreach using AI. We've helped teams like yours save 10+ hours per week while improving response rates significantly.
-
-Mind if I share a quick case study that might be relevant to [Company Name]'s growth goals?
-
-Cheers,
-[Your Name]`,
-      category: "Agency",
-      tone: "Friendly",
-      isFavorite: false,
-      createdAt: "2024-01-05",
-      lastUsed: "2024-01-17",
-      usageCount: 67,
-      tags: ["agency", "client", "case-study"],
-    },
-  ])
+    loadTemplates();
+  }, []);
 
   const categories = ["all", "Sales", "Recruiting", "Partnerships", "Agency", "Follow-up"]
   const tones = ["all", "Friendly", "Direct", "Professional", "Funny"]
@@ -175,16 +125,35 @@ Cheers,
     return matchesSearch && matchesCategory && matchesTone
   })
 
-  const toggleFavorite = (templateId: string) => {
+  const toggleFavorite = async (templateId: string) => {
+    // Update local state immediately for better UX
     setTemplates(
       templates.map((template) =>
         template.id === templateId ? { ...template, isFavorite: !template.isFavorite } : template,
       ),
     )
+    
+    // TODO: Add API call to update favorite status
   }
 
-  const deleteTemplate = (templateId: string) => {
-    setTemplates(templates.filter((template) => template.id !== templateId))
+  const deleteTemplate = async (templateId: string) => {
+    try {
+      const response = await fetch("/api/templates", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: templateId }),
+      });
+
+      if (response.ok) {
+        setTemplates(templates.filter((template) => template.id !== templateId));
+      } else {
+        setError("Failed to delete template");
+      }
+    } catch (err) {
+      setError("Failed to delete template");
+    }
   }
 
   const copyToClipboard = (content: string) => {
@@ -198,11 +167,109 @@ Cheers,
       id: Date.now().toString(),
       title: `${template.title} (Copy)`,
       createdAt: new Date().toISOString().split("T")[0],
-      lastUsed: "",
       usageCount: 0,
-      isFavorite: false,
     }
     setTemplates([newTemplate, ...templates])
+  }
+
+  const saveTemplate = async (template: EmailTemplate) => {
+    try {
+      const response = await fetch("/api/templates", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: template.title,
+          content: template.content,
+          subject: template.subject,
+          category: template.category,
+          tone: template.tone,
+          tags: template.tags,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          // Add the new template to the list
+          const newTemplate = {
+            ...template,
+            id: data.template.id,
+            createdAt: data.template.created_at?.split("T")[0] || new Date().toISOString().split("T")[0],
+          };
+          setTemplates([newTemplate, ...templates]);
+          setIsCreateDialogOpen(false);
+        } else {
+          setError(data.error || "Failed to create template");
+        }
+      } else {
+        setError("Failed to create template");
+      }
+    } catch (err) {
+      setError("Failed to create template");
+    }
+  }
+
+  const updateTemplate = async (template: EmailTemplate) => {
+    try {
+      const response = await fetch("/api/templates", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: template.id,
+          name: template.title,
+          content: template.content,
+          subject: template.subject,
+          category: template.category,
+          tone: template.tone,
+          tags: template.tags,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          // Update the template in the list
+          setTemplates(
+            templates.map((t) =>
+              t.id === template.id ? { ...template, ...data.template } : t,
+            ),
+          );
+          setEditingTemplate(null);
+        } else {
+          setError(data.error || "Failed to update template");
+        }
+      } else {
+        setError("Failed to update template");
+      }
+    } catch (err) {
+      setError("Failed to update template");
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading templates...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>Retry</Button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -235,10 +302,7 @@ Cheers,
                     <CreateTemplateDialog
                       isOpen={isCreateDialogOpen}
                       onClose={() => setIsCreateDialogOpen(false)}
-                      onSave={(template) => {
-                        setTemplates([template, ...templates])
-                        setIsCreateDialogOpen(false)
-                      }}
+                      onSave={saveTemplate}
                     />
                   </Dialog>
                 </div>
@@ -391,10 +455,7 @@ Cheers,
                     template={editingTemplate}
                     isOpen={!!editingTemplate}
                     onClose={() => setEditingTemplate(null)}
-                    onSave={(updatedTemplate) => {
-                      setTemplates(templates.map((t) => (t.id === updatedTemplate.id ? updatedTemplate : t)))
-                      setEditingTemplate(null)
-                    }}
+                    onSave={updateTemplate}
                   />
                 )}
               </div>

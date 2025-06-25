@@ -58,62 +58,41 @@ export default function DashboardPage() {
   const [generateFromScratch, setGenerateFromScratch] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
   const [emailVariations, setEmailVariations] = useState<EmailVariation[]>([])
+  const [error, setError] = useState<string | null>(null)
 
   const handleGenerate = async () => {
     setIsGenerating(true)
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000))
 
-    const variations: EmailVariation[] = [
-      {
-        id: 1,
-        subject: "Quick question about [Company Name]'s growth strategy",
-        content: `Hi [First Name],
+    try {
+      const response = await fetch("/api/rewrite", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          baseEmail: generateFromScratch ? "" : baseEmail,
+          linkedinUrl,
+          persona,
+          tone,
+          generateFromScratch,
+        }),
+      });
 
-I noticed [Company Name] recently expanded into the European market - congratulations on that milestone! 
-
-I'm reaching out because I help companies like yours streamline their customer acquisition process through AI-powered email personalization. We've helped similar SaaS companies increase their response rates by 340%.
-
-Would you be open to a brief 15-minute call this week to discuss how we could help [Company Name] scale your outreach efforts?
-
-Best regards,
-[Your Name]`,
-        tone: tone || "Professional",
-      },
-      {
-        id: 2,
-        subject: "Love what [Company Name] is doing in [Industry]",
-        content: `Hey [First Name],
-
-Just came across [Company Name] and I'm genuinely impressed by your approach to [specific company focus]. The recent [specific achievement/news] caught my attention.
-
-I work with fast-growing companies to optimize their cold outreach using AI. We've helped teams like yours save 10+ hours per week while improving response rates significantly.
-
-Mind if I share a quick case study that might be relevant to [Company Name]'s growth goals?
-
-Cheers,
-[Your Name]`,
-        tone: tone || "Friendly",
-      },
-      {
-        id: 3,
-        subject: "Partnership opportunity for [Company Name]",
-        content: `Hello [First Name],
-
-I've been following [Company Name]'s journey and your recent [specific milestone] is impressive. Your focus on [company value/mission] aligns perfectly with what we're building.
-
-We help companies like yours automate and personalize their outreach at scale. Our AI has generated over $2M in pipeline for our clients this quarter alone.
-
-Are you available for a quick call to explore how we might collaborate?
-
-Best,
-[Your Name]`,
-        tone: tone || "Direct",
-      },
-    ]
-
-    setEmailVariations(variations)
-    setIsGenerating(false)
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setEmailVariations(data.variations);
+        } else {
+          setError(data.error || "Failed to generate email variations");
+        }
+      } else {
+        setError("Failed to generate email variations");
+      }
+    } catch (err) {
+      setError("Failed to generate email variations");
+    } finally {
+      setIsGenerating(false);
+    }
   }
 
   const copyToClipboard = (content: string) => {

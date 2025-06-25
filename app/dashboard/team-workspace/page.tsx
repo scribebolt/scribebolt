@@ -16,7 +16,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   Sidebar,
   SidebarContent,
@@ -79,103 +79,128 @@ export default function TeamWorkspacePage() {
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false)
   const [inviteEmail, setInviteEmail] = useState("")
   const [inviteRole, setInviteRole] = useState<TeamMember["role"]>("Viewer")
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
+  const [sharedResources, setSharedResources] = useState<SharedResource[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState("")
 
-  // Mock data
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([
-    {
-      id: "1",
-      name: "John Doe",
-      email: "john@company.com",
-      role: "Owner",
-      avatar: "/placeholder.svg?height=40&width=40",
-      joinedAt: "2024-01-01",
-      lastActive: "2024-01-20",
-    },
-    {
-      id: "2",
-      name: "Sarah Johnson",
-      email: "sarah@company.com",
-      role: "Editor",
-      joinedAt: "2024-01-05",
-      lastActive: "2024-01-19",
-    },
-    {
-      id: "3",
-      name: "Mike Chen",
-      email: "mike@company.com",
-      role: "Editor",
-      joinedAt: "2024-01-10",
-      lastActive: "2024-01-18",
-    },
-    {
-      id: "4",
-      name: "Emily Davis",
-      email: "emily@company.com",
-      role: "Viewer",
-      joinedAt: "2024-01-15",
-      lastActive: "2024-01-17",
-    },
-  ])
+  // Load team members from API
+  useEffect(() => {
+    const loadTeamData = async () => {
+      try {
+        const [membersResponse, resourcesResponse] = await Promise.all([
+          fetch("/api/team-members"),
+          fetch("/api/team-members/resources")
+        ]);
 
-  const sharedResources: SharedResource[] = [
-    {
-      id: "1",
-      name: "SaaS Founder Outreach",
-      type: "template",
-      createdBy: "John Doe",
-      createdAt: "2024-01-15",
-      usageCount: 45,
-    },
-    {
-      id: "2",
-      name: "Startup CTO",
-      type: "persona",
-      createdBy: "Sarah Johnson",
-      createdAt: "2024-01-10",
-      usageCount: 23,
-    },
-    {
-      id: "3",
-      name: "Partnership Proposal",
-      type: "template",
-      createdBy: "Mike Chen",
-      createdAt: "2024-01-08",
-      usageCount: 12,
-    },
-    {
-      id: "4",
-      name: "Ecommerce Founder",
-      type: "persona",
-      createdBy: "John Doe",
-      createdAt: "2024-01-05",
-      usageCount: 67,
-    },
-  ]
+        if (membersResponse.ok) {
+          const membersData = await membersResponse.json();
+          if (membersData.success) {
+            setTeamMembers(membersData.members);
+          } else {
+            setError(membersData.error || "Failed to load team members");
+          }
+        } else {
+          setError("Failed to load team members");
+        }
 
-  const handleInviteMember = () => {
+        if (resourcesResponse.ok) {
+          const resourcesData = await resourcesResponse.json();
+          if (resourcesData.success) {
+            setSharedResources(resourcesData.resources);
+          }
+        }
+      } catch (err) {
+        setError("Failed to load team data");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadTeamData();
+  }, []);
+
+  const handleInviteMember = async () => {
     if (!inviteEmail) return
 
-    const newMember: TeamMember = {
-      id: Date.now().toString(),
-      name: inviteEmail.split("@")[0],
-      email: inviteEmail,
-      role: inviteRole,
-      joinedAt: new Date().toISOString().split("T")[0],
-      lastActive: "Never",
+    try {
+      const response = await fetch("/api/team-members", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: inviteEmail,
+          role: inviteRole,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setTeamMembers([...teamMembers, data.member]);
+          setInviteEmail("");
+          setInviteRole("Viewer");
+          setIsInviteDialogOpen(false);
+        } else {
+          setError(data.error || "Failed to invite member");
+        }
+      } else {
+        setError("Failed to invite member");
+      }
+    } catch (err) {
+      setError("Failed to invite member");
     }
-
-    setTeamMembers([...teamMembers, newMember])
-    setInviteEmail("")
-    setInviteRole("Viewer")
-    setIsInviteDialogOpen(false)
   }
 
-  const updateMemberRole = (memberId: string, newRole: TeamMember["role"]) => {
-    setTeamMembers(teamMembers.map((member) => (member.id === memberId ? { ...member, role: newRole } : member)))
+  const updateMemberRole = async (memberId: string, newRole: TeamMember["role"]) => {
+    try {
+      const response = await fetch("/api/team-members", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: memberId,
+          role: newRole,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setTeamMembers(teamMembers.map((member) => 
+            member.id === memberId ? { ...member, role: newRole } : member
+          ));
+        } else {
+          setError(data.error || "Failed to update role");
+        }
+      } else {
+        setError("Failed to update role");
+      }
+    } catch (err) {
+      setError("Failed to update role");
+    }
   }
 
-  const removeMember = (memberId: string) => {
-    setTeamMembers(teamMembers.filter((member) => member.id !== memberId))
+  const removeMember = async (memberId: string) => {
+    try {
+      const response = await fetch("/api/team-members", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: memberId }),
+      });
+
+      if (response.ok) {
+        setTeamMembers(teamMembers.filter((member) => member.id !== memberId));
+      } else {
+        setError("Failed to remove member");
+      }
+    } catch (err) {
+      setError("Failed to remove member");
+    }
   }
 
   const getRoleIcon = (role: TeamMember["role"]) => {
@@ -198,6 +223,28 @@ export default function TeamWorkspacePage() {
       case "Viewer":
         return "bg-gray-100 text-gray-800 border-gray-200"
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading team data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>Retry</Button>
+        </div>
+      </div>
+    );
   }
 
   return (

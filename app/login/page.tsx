@@ -1,11 +1,61 @@
+"use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import Link from "next/link"
+import { supabase } from "@/lib/supabase-client";
 
 export default function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        setError(error.message);
+      } else if (data.session) {
+        router.push("/dashboard");
+      }
+    } catch (err) {
+      setError("An unexpected error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth-success`
+        }
+      });
+      
+      if (error) {
+        setError(error.message);
+      }
+    } catch (err) {
+      setError("Google login failed");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       {/* Background decoration */}
@@ -32,7 +82,12 @@ export default function LoginPage() {
             <CardDescription className="text-center text-gray-600">Sign in to your ScribeBolt account</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <form className="space-y-4">
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                {error}
+              </div>
+            )}
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium text-[#1A1A1A]">
                   Email
@@ -42,7 +97,10 @@ export default function LoginPage() {
                   type="email"
                   placeholder="Enter your email"
                   className="h-11 border-gray-300 focus:border-[#7B61FF] focus:ring-[#7B61FF]"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
+                  disabled={isLoading}
                 />
               </div>
               <div className="space-y-2">
@@ -54,7 +112,10 @@ export default function LoginPage() {
                   type="password"
                   placeholder="Enter your password"
                   className="h-11 border-gray-300 focus:border-[#7B61FF] focus:ring-[#7B61FF]"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
+                  disabled={isLoading}
                 />
               </div>
               <div className="flex justify-end">
@@ -68,8 +129,9 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 className="w-full h-11 bg-[#7B61FF] hover:bg-[#6B51E5] text-white font-medium transition-colors"
+                disabled={isLoading}
               >
-                Log in
+                {isLoading ? "Signing in..." : "Log in"}
               </Button>
             </form>
 
@@ -83,8 +145,11 @@ export default function LoginPage() {
             </div>
 
             <Button
+              type="button"
               variant="outline"
               className="w-full h-11 border-gray-300 hover:bg-gray-50 text-[#1A1A1A] font-medium transition-colors"
+              onClick={handleGoogleLogin}
+              disabled={isLoading}
             >
               <GoogleIcon className="mr-2 h-4 w-4" />
               Continue with Google
