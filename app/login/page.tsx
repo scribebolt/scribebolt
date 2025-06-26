@@ -20,12 +20,17 @@ function LoginPageInner() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    let isMounted = true;
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        router.replace(redirectPath);
-      } else {
-        setLoading(false);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          router.replace(redirectPath);
+        } else if (isMounted) {
+          setLoading(false);
+        }
+      } catch (err) {
+        if (isMounted) setLoading(false);
       }
     };
     checkUser();
@@ -36,6 +41,7 @@ function LoginPageInner() {
       }
     });
     return () => {
+      isMounted = false;
       listener?.subscription.unsubscribe();
     };
   }, [router, redirectPath, supabase]);
