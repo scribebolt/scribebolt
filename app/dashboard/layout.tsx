@@ -61,12 +61,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [router, pathname]);
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated && pathname.startsWith("/dashboard")) {
-      window.location.reload();
-    }
-  }, [isLoading, isAuthenticated, pathname]);
-
-  useEffect(() => {
     console.log('isLoading:', isLoading, 'isAuthenticated:', isAuthenticated, 'user:', user);
     console.log('Cookies:', document.cookie);
   }, [isLoading, isAuthenticated, user]);
@@ -91,10 +85,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </div>
     );
-  }
-
-  if (!isAuthenticated) {
-    return null;
   }
 
   return (
