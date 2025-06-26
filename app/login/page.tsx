@@ -1,5 +1,5 @@
 "use client";
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -18,6 +18,17 @@ function LoginPageInner() {
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get("redirect") || "/dashboard";
 
+  useEffect(() => {
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        window.location.replace(redirectPath);
+      }
+    });
+    return () => {
+      listener?.subscription.unsubscribe();
+    };
+  }, [redirectPath]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -31,12 +42,10 @@ function LoginPageInner() {
 
       if (error) {
         setError(error.message);
-      } else if (data.session) {
-        window.location.replace(redirectPath);
-        return;
-      } else {
+      } else if (!data.session) {
         setError("Login failed - no session returned");
       }
+      // Do not redirect here; let the auth state listener handle it
     } catch (err) {
       setError("An unexpected error occurred");
     } finally {
