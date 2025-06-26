@@ -39,7 +39,7 @@ function LoginPageInner() {
         email,
         password,
       });
-
+      console.log('LOGIN RESPONSE:', { data, error });
       if (error) {
         setError(error.message);
       } else if (!data.session) {
