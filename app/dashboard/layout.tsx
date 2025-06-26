@@ -60,6 +60,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     };
   }, [router, pathname]);
 
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated && pathname.startsWith("/dashboard")) {
+      window.location.reload();
+    }
+  }, [isLoading, isAuthenticated, pathname]);
+
   const handleLogout = useCallback(async () => {
     try {
       await signOut();
