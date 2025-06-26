@@ -24,6 +24,10 @@ export default function SignUpPage() {
     setError("");
 
     try {
+      console.log("Starting signup process...");
+      console.log("Email:", email);
+      console.log("Full name:", fullName);
+      
       // Sign up with Supabase Auth - the database trigger will create the profile automatically
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -35,13 +39,30 @@ export default function SignUpPage() {
         }
       });
 
+      console.log("Signup response:", { data, error });
+
       if (error) {
+        console.error("Signup error:", error);
         setError(error.message);
       } else if (data.user) {
-        // Profile will be created automatically by the database trigger
-        router.push("/onboarding");
+        console.log("User created successfully:", data.user);
+        
+        // Check if email confirmation is required
+        if (data.session) {
+          // User is immediately signed in (email confirmation not required)
+          console.log("User signed in immediately");
+          router.push("/onboarding");
+        } else {
+          // Email confirmation required
+          console.log("Email confirmation required");
+          setError("Please check your email to confirm your account before signing in.");
+        }
+      } else {
+        console.error("No user data returned");
+        setError("Signup failed - no user data returned");
       }
     } catch (err) {
+      console.error("Signup exception:", err);
       setError("An unexpected error occurred");
     } finally {
       setIsLoading(false);
