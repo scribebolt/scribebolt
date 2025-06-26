@@ -67,14 +67,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [isLoading, isAuthenticated, pathname]);
 
   useEffect(() => {
-    // If not authenticated but session cookies exist, force redirect to /dashboard
-    const hasSessionCookie = document.cookie.includes('sb-access-token') && document.cookie.includes('sb-refresh-token');
-    if (!isLoading && !isAuthenticated && hasSessionCookie && pathname !== "/dashboard") {
-      window.location.replace("/dashboard");
-    }
-  }, [isLoading, isAuthenticated, pathname]);
-
-  useEffect(() => {
     console.log('isLoading:', isLoading, 'isAuthenticated:', isAuthenticated, 'user:', user);
     console.log('Cookies:', document.cookie);
   }, [isLoading, isAuthenticated, user]);
