@@ -30,7 +30,8 @@ export default function LoginPage() {
       if (error) {
         setError(error.message);
       } else if (data.session) {
-        router.push("/dashboard");
+        // Force a full page reload to ensure session is picked up
+        window.location.href = "/dashboard";
       }
     } catch (err) {
       setError("An unexpected error occurred");

@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { AdminSidebar } from "@/components/admin-sidebar";
 import { getSession, signOut } from "@/lib/supabase-client";
+import { supabase } from "@/lib/supabase-client";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -40,6 +41,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     };
 
     checkAuth();
+
+    // Listen for Supabase auth state changes
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        setIsAuthenticated(true);
+        setUser(session.user);
+      } else {
+        setIsAuthenticated(false);
+        setUser(null);
+        if (pathname.startsWith("/dashboard")) {
+          router.replace("/login");
+        }
+      }
+    });
+    return () => {
+      listener?.subscription.unsubscribe();
+    };
   }, [router, pathname]);
 
   const handleLogout = useCallback(async () => {

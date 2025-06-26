@@ -130,8 +130,8 @@ export default function TeamWorkspacePage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: inviteEmail,
-          role: inviteRole,
+      email: inviteEmail,
+      role: inviteRole,
         }),
       });
 
