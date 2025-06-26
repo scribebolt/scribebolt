@@ -14,6 +14,8 @@ function LoginPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get("redirect") || "/dashboard";
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -48,11 +50,6 @@ function LoginPageInner() {
     }
   };
 
-  if (loading) return <div>Loading...</div>;
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     handleLogin(email, password);
@@ -66,7 +63,6 @@ function LoginPageInner() {
           redirectTo: `${window.location.origin}/auth-success`
         }
       });
-      
       if (error) {
         setError(error.message);
       }
@@ -74,6 +70,8 @@ function LoginPageInner() {
       setError("Google login failed");
     }
   };
+
+  if (loading) return <div>Loading...</div>;
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
