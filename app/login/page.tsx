@@ -18,17 +18,6 @@ function LoginPageInner() {
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get("redirect") || "/dashboard";
 
-  useEffect(() => {
-    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        window.location.replace(redirectPath);
-      }
-    });
-    return () => {
-      listener?.subscription.unsubscribe();
-    };
-  }, [redirectPath]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -42,10 +31,12 @@ function LoginPageInner() {
       console.log('LOGIN RESPONSE:', { data, error });
       if (error) {
         setError(error.message);
-      } else if (!data.session) {
+      } else if (data.session) {
+        window.location.replace(redirectPath);
+        return;
+      } else {
         setError("Login failed - no session returned");
       }
-      // Do not redirect here; let the auth state listener handle it
     } catch (err) {
       setError("An unexpected error occurred");
     } finally {
