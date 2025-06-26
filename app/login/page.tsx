@@ -7,10 +7,10 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import Link from "next/link"
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
 
 function LoginPageInner() {
-  const supabase = createClientComponentClient();
+  const supabase = useSupabaseClient();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get("redirect") || "/dashboard";
@@ -40,7 +40,7 @@ function LoginPageInner() {
     };
   }, [router, redirectPath, supabase]);
 
-  const handleLogin = async (email, password) => {
+  const handleLogin = async (email: string, password: string) => {
     setError("");
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (data.session) {
