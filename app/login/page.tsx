@@ -16,7 +16,6 @@ function LoginPageInner() {
   const redirectPath = searchParams.get("redirect") || "/dashboard";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -28,12 +27,9 @@ function LoginPageInner() {
         console.log("Session result:", session);
         if (session) {
           router.replace(redirectPath);
-        } else if (isMounted) {
-          setLoading(false);
         }
       } catch (err) {
         console.error("Error in checkUser:", err);
-        if (isMounted) setLoading(false);
       }
     };
     checkUser();
@@ -79,8 +75,6 @@ function LoginPageInner() {
       setError("Google login failed");
     }
   };
-
-  if (loading) return <div>Loading...</div>;
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
