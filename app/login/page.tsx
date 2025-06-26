@@ -29,6 +29,10 @@ function LoginPageInner() {
         password,
       });
       console.log('LOGIN RESPONSE:', { data, error });
+      if (data) {
+        console.log('Supabase data.user:', data.user);
+        console.log('Supabase data.session:', data.session);
+      }
       if (error) {
         setError(error.message);
       } else if (data.session) {
@@ -38,6 +42,7 @@ function LoginPageInner() {
         setError("Login failed - no session returned");
       }
     } catch (err) {
+      console.error('LOGIN EXCEPTION:', err);
       setError("An unexpected error occurred");
     } finally {
       setIsLoading(false);
