@@ -6,5 +6,9 @@ const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env
 export async function POST() {
   const { error } = await supabase.auth.signOut();
   if (error) return NextResponse.json({ success: false, error: error.message }, { status: 400 });
-  return NextResponse.json({ success: true });
+  // Clear cookies
+  const response = NextResponse.json({ success: true });
+  response.cookies.set('sb-access-token', '', { path: '/', maxAge: 0 });
+  response.cookies.set('sb-refresh-token', '', { path: '/', maxAge: 0 });
+  return response;
 } 

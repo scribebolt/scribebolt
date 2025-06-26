@@ -17,5 +17,25 @@ export async function POST(req: NextRequest) {
     created_at: new Date().toISOString(),
   });
 
-  return NextResponse.json({ success: true, user: data.user });
+  // If session is present, set cookies
+  if (data.session) {
+    const response = NextResponse.json({ success: true, user: data.user });
+    response.cookies.set('sb-access-token', data.session.access_token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7 // 7 days
+    });
+    response.cookies.set('sb-refresh-token', data.session.refresh_token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 30 // 30 days
+    });
+    return response;
+  }
+  // If no session, likely email confirmation required
+  return NextResponse.json({ success: true, user: data.user, confirmationRequired: true });
 } 
