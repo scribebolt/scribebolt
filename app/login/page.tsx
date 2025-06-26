@@ -108,6 +108,7 @@ function LoginPageInner() {
                 </Label>
                 <Input
                   id="email"
+                  name="email"
                   type="email"
                   placeholder="Enter your email"
                   className="h-11 border-gray-300 focus:border-[#7B61FF] focus:ring-[#7B61FF]"
@@ -123,6 +124,7 @@ function LoginPageInner() {
                 </Label>
                 <Input
                   id="password"
+                  name="password"
                   type="password"
                   placeholder="Enter your password"
                   className="h-11 border-gray-300 focus:border-[#7B61FF] focus:ring-[#7B61FF]"

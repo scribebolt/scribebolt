@@ -124,6 +124,7 @@ export default function SignUpPage() {
                 </Label>
                 <Input
                   id="name"
+                  name="fullName"
                   type="text"
                   placeholder="Enter your full name"
                   className="h-11 border-gray-300 focus:border-[#7B61FF] focus:ring-[#7B61FF]"
@@ -139,6 +140,7 @@ export default function SignUpPage() {
                 </Label>
                 <Input
                   id="email"
+                  name="email"
                   type="email"
                   placeholder="Enter your email"
                   className="h-11 border-gray-300 focus:border-[#7B61FF] focus:ring-[#7B61FF]"
@@ -154,6 +156,7 @@ export default function SignUpPage() {
                 </Label>
                 <Input
                   id="password"
+                  name="password"
                   type="password"
                   placeholder="Create a password"
                   className="h-11 border-gray-300 focus:border-[#7B61FF] focus:ring-[#7B61FF]"
