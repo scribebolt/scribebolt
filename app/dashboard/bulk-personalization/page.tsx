@@ -59,7 +59,46 @@ export default function BulkPersonalizationPage() {
   const [isUploading, setIsUploading] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
   const [generatedCount, setGeneratedCount] = useState(0)
-  const [error, setError] = useState<string | null>(null)
+
+  // Mock data for demonstration
+  const mockCsvData: CsvRow[] = [
+    {
+      id: 1,
+      firstName: "John",
+      lastName: "Smith",
+      email: "john@techstartup.com",
+      company: "TechStartup Inc",
+      linkedinUrl: "https://linkedin.com/in/johnsmith",
+      status: "completed",
+    },
+    {
+      id: 2,
+      firstName: "Sarah",
+      lastName: "Johnson",
+      email: "sarah@innovatecorp.com",
+      company: "InnovateCorp",
+      linkedinUrl: "https://linkedin.com/in/sarahjohnson",
+      status: "completed",
+    },
+    {
+      id: 3,
+      firstName: "Mike",
+      lastName: "Chen",
+      email: "mike@growthco.com",
+      company: "GrowthCo",
+      linkedinUrl: "https://linkedin.com/in/mikechen",
+      status: "processing",
+    },
+    {
+      id: 4,
+      firstName: "Emily",
+      lastName: "Davis",
+      email: "emily@scalevp.com",
+      company: "ScaleVP",
+      linkedinUrl: "https://linkedin.com/in/emilydavis",
+      status: "pending",
+    },
+  ]
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -68,90 +107,39 @@ export default function BulkPersonalizationPage() {
     setCsvFile(file)
     setIsUploading(true)
 
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
+    // Simulate file processing
+    await new Promise((resolve) => setTimeout(resolve, 2000))
 
-      const response = await fetch("/api/bulk-personalization/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          setCsvData(data.rows);
-        } else {
-          setError(data.error || "Failed to upload file");
-        }
-      } else {
-        setError("Failed to upload file");
-      }
-    } catch (err) {
-      setError("Failed to upload file");
-    } finally {
-      setIsUploading(false);
-    }
+    setCsvData(mockCsvData)
+    setIsUploading(false)
   }
 
   const handleGenerateAll = async () => {
     setIsGenerating(true)
     setGeneratedCount(0)
 
-    try {
-      const response = await fetch("/api/bulk-personalization/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          rows: csvData,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          setCsvData(data.processedRows);
-          setGeneratedCount(data.processedRows.length);
-        } else {
-          setError(data.error || "Failed to generate personalized emails");
-        }
-      } else {
-        setError("Failed to generate personalized emails");
-      }
-    } catch (err) {
-      setError("Failed to generate personalized emails");
-    } finally {
-      setIsGenerating(false);
+    // Simulate processing each row
+    for (let i = 0; i < csvData.length; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      setCsvData((prev) => prev.map((row, index) => (index === i ? { ...row, status: "completed" as const } : row)))
+      setGeneratedCount(i + 1)
     }
+
+    setIsGenerating(false)
   }
 
-  const handleDownload = async () => {
-    try {
-      const response = await fetch("/api/bulk-personalization/download", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          rows: csvData,
-        }),
-      });
+  const handleDownload = () => {
+    // In a real app, this would generate and download the CSV with results
+    const csvContent = csvData
+      .map((row) => `${row.firstName},${row.lastName},${row.email},${row.company},${row.status}`)
+      .join("\n")
 
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "personalized_emails.csv";
-        a.click();
-      } else {
-        setError("Failed to download results");
-      }
-    } catch (err) {
-      setError("Failed to download results");
-    }
+    const blob = new Blob([csvContent], { type: "text/csv" })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = "personalized_emails.csv"
+    a.click()
   }
 
   const getStatusBadge = (status: CsvRow["status"]) => {

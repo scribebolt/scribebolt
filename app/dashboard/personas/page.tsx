@@ -14,7 +14,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import {
   Sidebar,
   SidebarContent,
@@ -57,153 +57,66 @@ export default function PersonasPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [editingPersona, setEditingPersona] = useState(null)
-  const [personas, setPersonas] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState("")
 
-  // Load personas from API
-  useEffect(() => {
-    const loadPersonas = async () => {
-      try {
-        const response = await fetch("/api/personas");
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success) {
-            setPersonas(data.personas);
-          } else {
-            setError(data.error || "Failed to load personas");
-          }
-        } else {
-          setError("Failed to load personas");
-        }
-      } catch (err) {
-        setError("Failed to load personas");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadPersonas();
-  }, []);
+  // Mock data - in a real app, this would come from an API
+  const [personas, setPersonas] = useState([
+    {
+      id: "1",
+      name: "Startup CTO",
+      description: "Technical leader at early-stage startups",
+      painPoints:
+        "Scaling engineering teams, choosing the right tech stack, managing technical debt while moving fast, balancing feature development with infrastructure needs.",
+      createdAt: "2024-01-15",
+      lastUsed: "2024-01-20",
+      usageCount: 23,
+    },
+    {
+      id: "2",
+      name: "Ecommerce Founder",
+      description: "Founder of D2C ecommerce brands",
+      painPoints:
+        "Customer acquisition costs rising, inventory management challenges, competing with Amazon, building brand loyalty, optimizing conversion rates.",
+      createdAt: "2024-01-10",
+      lastUsed: "2024-01-18",
+      usageCount: 45,
+    },
+    {
+      id: "3",
+      name: "SaaS Marketing Director",
+      description: "Marketing leader at B2B SaaS companies",
+      painPoints:
+        "Generating qualified leads, proving marketing ROI, long sales cycles, competitive market, attribution challenges across multiple touchpoints.",
+      createdAt: "2024-01-08",
+      lastUsed: "2024-01-19",
+      usageCount: 31,
+    },
+    {
+      id: "4",
+      name: "Agency Owner",
+      description: "Owner of digital marketing agency",
+      painPoints:
+        "Client retention, scaling operations, finding quality talent, pricing services competitively, managing cash flow with project-based revenue.",
+      createdAt: "2024-01-05",
+      lastUsed: "2024-01-17",
+      usageCount: 18,
+    },
+  ])
 
   const filteredPersonas = personas.filter(
     (persona) =>
       persona.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       persona.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      persona.pain_points.toLowerCase().includes(searchQuery.toLowerCase()),
+      persona.painPoints.toLowerCase().includes(searchQuery.toLowerCase()),
   )
 
-  const deletePersona = async (personaId) => {
-    try {
-      const response = await fetch("/api/personas", {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ id: personaId }),
-      });
-
-      if (response.ok) {
-        setPersonas(personas.filter((persona) => persona.id !== personaId));
-      } else {
-        setError("Failed to delete persona");
-      }
-    } catch (err) {
-      setError("Failed to delete persona");
-    }
-  }
-
-  const savePersona = async (persona) => {
-    try {
-      const response = await fetch("/api/personas", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: persona.name,
-          description: persona.description,
-          pain_points: persona.pain_points,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          setPersonas([data.persona, ...personas]);
-          setIsCreateDialogOpen(false);
-        } else {
-          setError(data.error || "Failed to create persona");
-        }
-      } else {
-        setError("Failed to create persona");
-      }
-    } catch (err) {
-      setError("Failed to create persona");
-    }
-  }
-
-  const updatePersona = async (persona) => {
-    try {
-      const response = await fetch("/api/personas", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id: persona.id,
-          name: persona.name,
-          description: persona.description,
-          pain_points: persona.pain_points,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          setPersonas(
-            personas.map((p) =>
-              p.id === persona.id ? { ...persona, ...data.persona } : p,
-            ),
-          );
-          setEditingPersona(null);
-        } else {
-          setError(data.error || "Failed to update persona");
-        }
-      } else {
-        setError("Failed to update persona");
-      }
-    } catch (err) {
-      setError("Failed to update persona");
-    }
+  const deletePersona = (personaId) => {
+    setPersonas(personas.filter((persona) => persona.id !== personaId))
   }
 
   const usePersonaInRewrite = (persona) => {
     // In a real app, this would navigate to the rewrite page with the persona pre-selected
     console.log("Using persona in rewrite:", persona.name)
     // You could use router.push('/dashboard?persona=' + persona.id) here
-  }
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading personas...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">{error}</p>
-          <Button onClick={() => window.location.reload()}>Retry</Button>
-        </div>
-      </div>
-    );
   }
 
   return (
@@ -288,12 +201,13 @@ export default function PersonasPage() {
                                 id: Date.now().toString(),
                                 name: searchQuery,
                                 description: searchQuery,
-                                pain_points: searchQuery,
+                                painPoints: searchQuery,
                                 createdAt: new Date().toISOString().split("T")[0],
                                 lastUsed: "",
                                 usageCount: 0,
                               }
-                              savePersona(newPersona)
+                              setPersonas([newPersona, ...personas])
+                              setIsCreateDialogOpen(false)
                             }}
                             className="bg-[#7B61FF] hover:bg-[#6B51E5] text-white"
                           >
@@ -452,8 +366,8 @@ export default function PersonasPage() {
                           </Label>
                           <Textarea
                             id="edit-painPoints"
-                            value={editingPersona.pain_points}
-                            onChange={(e) => setEditingPersona({ ...editingPersona, pain_points: e.target.value })}
+                            value={editingPersona.painPoints}
+                            onChange={(e) => setEditingPersona({ ...editingPersona, painPoints: e.target.value })}
                             className="min-h-[120px]"
                           />
                         </div>
@@ -465,7 +379,8 @@ export default function PersonasPage() {
                           <Button
                             onClick={() => {
                               if (editingPersona) {
-                                updatePersona(editingPersona)
+                                setPersonas(personas.map((p) => (p.id === editingPersona.id ? editingPersona : p)))
+                                setEditingPersona(null)
                               }
                             }}
                             className="bg-[#7B61FF] hover:bg-[#6B51E5] text-white"
@@ -517,7 +432,7 @@ function PersonaCard({ persona, onDelete, onEdit, onUse }) {
       <CardContent className="space-y-4">
         <div>
           <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pain Points:</p>
-          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3">{persona.pain_points}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3">{persona.painPoints}</p>
         </div>
 
         <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">

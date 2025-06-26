@@ -1,63 +1,83 @@
-"use client";
-import { useState } from "react";
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import Link from "next/link"
+import { ArrowLeft, Mail } from "lucide-react"
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [sent, setSent] = useState(false);
-
-  const handleForgotPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-    setSent(false);
-    const res = await fetch("https://" + process.env.NEXT_PUBLIC_SUPABASE_URL!.replace(/^https?:\/\//, "") + "/auth/v1/recover", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      },
-      body: JSON.stringify({ email }),
-    });
-    setLoading(false);
-    if (res.ok) {
-      setSent(true);
-    } else {
-      const data = await res.json();
-      setError(data.error?.message || "Failed to send reset email");
-    }
-  };
-
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      <form onSubmit={handleForgotPassword} className="w-full max-w-sm space-y-4">
-        <h1 className="text-2xl font-bold mb-4">Forgot Password</h1>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          className="w-full px-3 py-2 border rounded"
-          required
-        />
-        {error && <div className="text-red-500 text-sm">{error}</div>}
-        {sent && (
-          <div className="text-green-600 text-sm">
-            If your email is registered, you will receive a password reset link.
-          </div>
-        )}
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded disabled:opacity-50"
-          disabled={loading}
-        >
-          {loading ? "Sending..." : "Send Reset Link"}
-        </button>
-        <div className="text-center text-sm mt-2">
-          <a href="/login" className="text-blue-600 hover:underline">Back to login</a>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      {/* Background decoration */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-32 left-32 w-28 h-28 bg-[#7B61FF]/5 rounded-full"></div>
+        <div className="absolute bottom-32 right-32 w-20 h-20 bg-[#7B61FF]/10 rounded-full"></div>
+        <div className="absolute top-1/3 right-20 w-12 h-12 bg-[#7B61FF]/8 rounded-full"></div>
+      </div>
+
+      <div className="w-full max-w-md relative z-10">
+        {/* Logo and branding */}
+        <div className="text-center mb-8">
+          <Link href="/" className="inline-block">
+            <h1 className="text-3xl font-bold text-[#1A1A1A] mb-2 hover:text-[#7B61FF] transition-colors cursor-pointer">
+              ScribeBolt
+            </h1>
+          </Link>
+          <p className="text-gray-600 text-sm">AI-powered cold email personalization</p>
         </div>
-      </form>
+
+        <Card className="shadow-lg border-0">
+          <CardHeader className="space-y-1 pb-6">
+            <div className="flex items-center justify-center w-12 h-12 bg-[#7B61FF]/10 rounded-full mx-auto mb-4">
+              <Mail className="h-6 w-6 text-[#7B61FF]" />
+            </div>
+            <CardTitle className="text-2xl font-semibold text-center text-[#1A1A1A]">Forgot password?</CardTitle>
+            <CardDescription className="text-center text-gray-600">
+              No worries, we'll send you reset instructions
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <form className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-sm font-medium text-[#1A1A1A]">
+                  Email
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  className="h-11 border-gray-300 focus:border-[#7B61FF] focus:ring-[#7B61FF]"
+                  required
+                />
+              </div>
+              <Button
+                type="submit"
+                className="w-full h-11 bg-[#7B61FF] hover:bg-[#6B51E5] text-white font-medium transition-colors"
+              >
+                Reset Password
+              </Button>
+            </form>
+
+            <div className="text-center">
+              <Link
+                href="/login"
+                className="inline-flex items-center text-sm text-[#7B61FF] hover:text-[#6B51E5] font-medium transition-colors"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to login
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Additional help text */}
+        <div className="mt-8 text-center">
+          <p className="text-sm text-gray-600 mb-2">Didn't receive the email?</p>
+          <button className="text-sm text-[#7B61FF] hover:text-[#6B51E5] font-medium transition-colors">
+            Click to resend
+          </button>
+        </div>
+      </div>
     </div>
-  );
-} 
+  )
+}

@@ -60,39 +60,36 @@ export default function EmailAnalyzerPage() {
   const [emailContent, setEmailContent] = useState("")
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null)
-  const [error, setError] = useState<string | null>(null)
 
   const handleAnalyze = async () => {
     if (!emailContent.trim()) return
 
     setIsAnalyzing(true)
 
-    try {
-      const response = await fetch("/api/email-analyzer", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          emailContent: emailContent.trim(),
-        }),
-      });
+    // Simulate analysis
+    await new Promise((resolve) => setTimeout(resolve, 2000))
 
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          setAnalysisResult(data.analysis);
-        } else {
-          setError(data.error || "Analysis failed");
-        }
-      } else {
-        setError("Analysis failed");
-      }
-    } catch (err) {
-      setError("Analysis failed");
-    } finally {
-      setIsAnalyzing(false);
+    // Mock analysis result
+    const result: AnalysisResult = {
+      personalizationScore: 75,
+      toneAnalysis: {
+        detected: "Professional",
+        confidence: 85,
+        suggestions: ["Consider adding more personal touches", "Use the recipient's name more frequently"],
+      },
+      spamPhrases: ["FREE", "Act now", "Limited time"],
+      readabilityScore: 82,
+      sentimentScore: 68,
+      improvements: [
+        "Add more specific details about the recipient's company",
+        "Include a clear call-to-action",
+        "Remove potential spam trigger words",
+        "Shorten sentences for better readability",
+      ],
     }
+
+    setAnalysisResult(result)
+    setIsAnalyzing(false)
   }
 
   const getScoreColor = (score: number) => {
@@ -127,10 +124,10 @@ export default function EmailAnalyzerPage() {
                   </p>
                 </div>
 
-                <div className="flex flex-col gap-8 w-full">
+                <div className="grid lg:grid-cols-2 gap-8">
                   {/* Input Section */}
-                  <div className="w-full">
-                    <Card className="w-full shadow-sm border-gray-200 dark:border-purple-500/30 dark:bg-gray-800 transition-all duration-300">
+                  <div className="space-y-6">
+                    <Card className="shadow-sm border-gray-200 dark:border-purple-500/30 dark:bg-gray-800 transition-all duration-300">
                       <CardHeader>
                         <CardTitle className="flex items-center text-[#1A1A1A] dark:text-white">
                           <MessageSquare className="h-5 w-5 mr-2 text-[#7B61FF]" />
@@ -182,11 +179,11 @@ Best regards,
                   </div>
 
                   {/* Results Section */}
-                  <div className="w-full">
+                  <div className="space-y-6">
                     {analysisResult ? (
                       <>
                         {/* Score Overview */}
-                        <Card className="w-full shadow-sm border-gray-200 dark:border-purple-500/30 dark:bg-gray-800 transition-all duration-300">
+                        <Card className="shadow-sm border-gray-200 dark:border-purple-500/30 dark:bg-gray-800 transition-all duration-300">
                           <CardHeader>
                             <CardTitle className="flex items-center text-[#1A1A1A] dark:text-white">
                               <TrendingUp className="h-5 w-5 mr-2 text-[#7B61FF]" />
@@ -216,7 +213,7 @@ Best regards,
                         </Card>
 
                         {/* Tone Analysis */}
-                        <Card className="w-full shadow-sm border-gray-200 dark:border-purple-500/30 dark:bg-gray-800 transition-all duration-300">
+                        <Card className="shadow-sm border-gray-200 dark:border-purple-500/30 dark:bg-gray-800 transition-all duration-300">
                           <CardHeader>
                             <CardTitle className="flex items-center text-[#1A1A1A] dark:text-white">
                               <MessageSquare className="h-5 w-5 mr-2 text-[#7B61FF]" />
@@ -246,7 +243,7 @@ Best regards,
                         </Card>
 
                         {/* Spam Risk */}
-                        <Card className="w-full shadow-sm border-gray-200 dark:border-purple-500/30 dark:bg-gray-800 transition-all duration-300">
+                        <Card className="shadow-sm border-gray-200 dark:border-purple-500/30 dark:bg-gray-800 transition-all duration-300">
                           <CardHeader>
                             <CardTitle className="flex items-center text-[#1A1A1A] dark:text-white">
                               <AlertTriangle className="h-5 w-5 mr-2 text-[#7B61FF]" />
@@ -280,7 +277,7 @@ Best regards,
                         </Card>
 
                         {/* Improvements */}
-                        <Card className="w-full shadow-sm border-gray-200 dark:border-purple-500/30 dark:bg-gray-800 transition-all duration-300">
+                        <Card className="shadow-sm border-gray-200 dark:border-purple-500/30 dark:bg-gray-800 transition-all duration-300">
                           <CardHeader>
                             <CardTitle className="flex items-center text-[#1A1A1A] dark:text-white">
                               <Sparkles className="h-5 w-5 mr-2 text-[#7B61FF]" />
@@ -302,7 +299,7 @@ Best regards,
                         </Card>
                       </>
                     ) : (
-                      <Card className="w-full shadow-sm border-gray-200 dark:border-purple-500/30 dark:bg-gray-800 transition-all duration-300">
+                      <Card className="shadow-sm border-gray-200 dark:border-purple-500/30 dark:bg-gray-800 transition-all duration-300">
                         <CardContent className="flex flex-col items-center justify-center py-12 text-center">
                           <div className="w-16 h-16 bg-[#7B61FF]/10 rounded-full flex items-center justify-center mb-4">
                             <TrendingUp className="h-8 w-8 text-[#7B61FF]" />
