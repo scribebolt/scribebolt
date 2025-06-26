@@ -126,6 +126,7 @@ export default function SignUpPage() {
                   id="name"
                   name="fullName"
                   type="text"
+                  autoComplete="name"
                   placeholder="Enter your full name"
                   className="h-11 border-gray-300 focus:border-[#7B61FF] focus:ring-[#7B61FF]"
                   value={fullName}
@@ -142,6 +143,7 @@ export default function SignUpPage() {
                   id="email"
                   name="email"
                   type="email"
+                  autoComplete="email"
                   placeholder="Enter your email"
                   className="h-11 border-gray-300 focus:border-[#7B61FF] focus:ring-[#7B61FF]"
                   value={email}
@@ -158,6 +160,7 @@ export default function SignUpPage() {
                   id="password"
                   name="password"
                   type="password"
+                  autoComplete="new-password"
                   placeholder="Create a password"
                   className="h-11 border-gray-300 focus:border-[#7B61FF] focus:ring-[#7B61FF]"
                   value={password}

@@ -106,6 +106,7 @@ function LoginPageInner() {
                   id="email"
                   name="email"
                   type="email"
+                  autoComplete="username"
                   placeholder="Enter your email"
                   className="h-11 border-gray-300 focus:border-[#7B61FF] focus:ring-[#7B61FF]"
                   value={email}
@@ -122,6 +123,7 @@ function LoginPageInner() {
                   id="password"
                   name="password"
                   type="password"
+                  autoComplete="current-password"
                   placeholder="Enter your password"
                   className="h-11 border-gray-300 focus:border-[#7B61FF] focus:ring-[#7B61FF]"
                   value={password}
