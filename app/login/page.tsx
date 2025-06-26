@@ -7,57 +7,55 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import Link from "next/link"
-import { supabase } from "@/lib/supabase-client";
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 function LoginPageInner() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const supabase = createClientComponentClient();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get("redirect") || "/dashboard";
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // If already logged in, redirect away immediately
   useEffect(() => {
-    const checkSession = async () => {
-      const { data, error } = await supabase.auth.getSession();
-      if (data?.session) {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
         router.replace(redirectPath);
+      } else {
+        setLoading(false);
       }
     };
-    checkSession();
-  }, [router, redirectPath]);
+    checkUser();
+    // Listen for auth state changes
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        router.replace(redirectPath);
+      }
+    });
+    return () => {
+      listener?.subscription.unsubscribe();
+    };
+  }, [router, redirectPath, supabase]);
+
+  const handleLogin = async (email, password) => {
+    setError("");
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (data.session) {
+      router.replace(redirectPath);
+    } else if (error) {
+      setError(error.message);
+    }
+  };
+
+  if (loading) return <div>Loading...</div>;
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError("");
-
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      console.log('LOGIN RESPONSE:', { data, error });
-      if (data) {
-        console.log('Supabase data.user:', data.user);
-        console.log('Supabase data.session:', data.session);
-      }
-      if (error) {
-        setError(error.message);
-      } else if (data.session) {
-        router.replace(redirectPath);
-        return;
-      } else {
-        setError("Login failed - no session returned");
-      }
-    } catch (err) {
-      console.error('LOGIN EXCEPTION:', err);
-      setError("An unexpected error occurred");
-    } finally {
-      setIsLoading(false);
-    }
+    handleLogin(email, password);
   };
 
   const handleGoogleLogin = async () => {
@@ -123,7 +121,6 @@ function LoginPageInner() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  disabled={isLoading}
                 />
               </div>
               <div className="space-y-2">
@@ -140,7 +137,6 @@ function LoginPageInner() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  disabled={isLoading}
                 />
               </div>
               <div className="flex justify-end">
@@ -154,9 +150,8 @@ function LoginPageInner() {
               <Button
                 type="submit"
                 className="w-full h-11 bg-[#7B61FF] hover:bg-[#6B51E5] text-white font-medium transition-colors"
-                disabled={isLoading}
               >
-                {isLoading ? "Signing in..." : "Log in"}
+                Log in
               </Button>
             </form>
 
@@ -174,7 +169,6 @@ function LoginPageInner() {
               variant="outline"
               className="w-full h-11 border-gray-300 hover:bg-gray-50 text-[#1A1A1A] font-medium transition-colors"
               onClick={handleGoogleLogin}
-              disabled={isLoading}
             >
               <GoogleIcon className="mr-2 h-4 w-4" />
               Continue with Google
