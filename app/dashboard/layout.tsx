@@ -3,8 +3,18 @@ import type React from "react";
 import { useEffect, useState, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { AdminSidebar } from "@/components/admin-sidebar";
-import { getSession, signOut } from "@/lib/supabase-client";
-import { supabase } from "@/lib/supabase-client";
+import { createClientSupabase } from "@/lib/supabase-browser";
+
+const supabase = createClientSupabase();
+
+async function getSession() {
+  const { data, error } = await supabase.auth.getSession();
+  return { session: data.session, error };
+}
+
+async function signOut() {
+  await supabase.auth.signOut();
+}
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
