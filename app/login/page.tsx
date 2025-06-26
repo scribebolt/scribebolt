@@ -18,6 +18,17 @@ function LoginPageInner() {
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get("redirect") || "/dashboard";
 
+  // If already logged in, redirect away immediately
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data, error } = await supabase.auth.getSession();
+      if (data?.session) {
+        router.replace(redirectPath);
+      }
+    };
+    checkSession();
+  }, [router, redirectPath]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -36,7 +47,7 @@ function LoginPageInner() {
       if (error) {
         setError(error.message);
       } else if (data.session) {
-        window.location.replace(redirectPath);
+        router.replace(redirectPath);
         return;
       } else {
         setError("Login failed - no session returned");
