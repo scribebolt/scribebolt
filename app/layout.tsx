@@ -2,7 +2,6 @@ import type React from "react"
 import type { Metadata } from "next"
 import "./globals.css"
 import { ThemeProvider } from "@/lib/theme-context"
-import { SupabaseProvider } from "@/components/SupabaseProvider";
 
 export const metadata: Metadata = {
   title: "v0 App",
@@ -18,9 +17,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ThemeProvider>
-          <SupabaseProvider>{children}</SupabaseProvider>
-        </ThemeProvider>
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   )
