@@ -23,13 +23,16 @@ function LoginPageInner() {
     let isMounted = true;
     const checkUser = async () => {
       try {
+        console.log("Checking user session...", supabase);
         const { data: { session } } = await supabase.auth.getSession();
+        console.log("Session result:", session);
         if (session) {
           router.replace(redirectPath);
         } else if (isMounted) {
           setLoading(false);
         }
       } catch (err) {
+        console.error("Error in checkUser:", err);
         if (isMounted) setLoading(false);
       }
     };
